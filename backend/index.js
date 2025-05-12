@@ -4,12 +4,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 
 const { HoldingsModel } = require("./models/HoldingsModel");
 const { PositionsModel } = require("./models/PositionsModel");
 const { OrdersModel } = require("./models/OrdersModel");
+const UserData = require("./models/UserModel");
 
-const PORT = process.env.PORT || 3002;
+const PORT = 8000;
 const uri = process.env.MONGODB_URL;
 
 const app = express();
@@ -208,9 +210,42 @@ app.post("/newOrder", (req, res) => {
 
   res.send("Order Saved");
 });
+app.post("/signup", async (req, res) => {
+  const email = req.body.email;
+  const findEmail = await UserData.find({ email: email });
+  if (findEmail.length > 0) {
+    return res.status(400).send("User already exist");
+  } else {
+    let newOrder = new UserData({
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 8),
+    });
+
+    await newOrder.save();
+
+    return res.send("User data Sucessfully");
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const findEmail = await UserData.find({ email: email });
+  if (findEmail.length > 0) {
+    if (await bcrypt.compareSync(password, findEmail[0].password)) {
+      return res.status(200).send("User found");
+    } else {
+      return res.status(400).send("Password not match");
+    }
+  } else {
+    return res.status(400).send("User not found");
+  }
+
+  res.send("User data Sucessfully");
+});
 
 app.listen(PORT, () => {
-  console.log("App started");
+  console.log("App started", PORT);
   mongoose.connect(uri);
   console.log("DB Connected");
 });
