@@ -210,6 +210,8 @@ app.post("/newOrder", (req, res) => {
 
   res.send("Order Saved");
 });
+
+app.post("/sellOrder", (req, res) => {});
 app.post("/signup", async (req, res) => {
   const email = req.body.email;
   const findEmail = await UserData.find({ email: email });
@@ -223,7 +225,7 @@ app.post("/signup", async (req, res) => {
 
     await newOrder.save();
 
-    return res.send("User data Sucessfully");
+    return res.send("success");
   }
 });
 
