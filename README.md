@@ -85,7 +85,6 @@ cd backend
 npm install
 # Create a .env file with:
 # MONGO_URI=your_mongo_connection_string
-# JWT_SECRET=your_secret
 npm start
 ```
 
