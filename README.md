@@ -65,7 +65,7 @@ finovate/
 │
 ├── README.md
 └── .gitignore
-
+```
 ---
 
 ## ⚙️ Setup Instructions
