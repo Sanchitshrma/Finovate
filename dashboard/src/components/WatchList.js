@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 
 import GeneralContext from "./GeneralContext";
-import GeneralContext1 from "./GeneralContext1";
 
 import { Tooltip, Grow } from "@mui/material";
 
@@ -129,15 +128,15 @@ const WatchListItem = ({ stock }) => {
 
 const WatchListActions = ({ uid }) => {
   const generalContext = useContext(GeneralContext);
-  const generalContext1 = useContext(GeneralContext1);
+
+  const handleSellClick = () => {
+    generalContext.openBuyWindow(uid);
+  };
 
   const handleBuyClick = () => {
     generalContext.openBuyWindow(uid);
   };
 
-  const handleSellClick = () => {
-    generalContext1.openBuyWindow(uid);
-  };
   return (
     <span className="actions">
       <span>
