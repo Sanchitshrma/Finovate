@@ -35,7 +35,7 @@
 ---
 
 ## 📂 Project Structure
-
+```bash
 finovate/
 │
 ├── backend/                 # Node.js + Express.js backend
