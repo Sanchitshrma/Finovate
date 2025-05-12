@@ -1,6 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
 import OpenAccount from "../OpenAccount";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 function Signup() {
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [login, setLogin] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  function signupHandler() {
+    setLogin(false);
+  }
+  function loginHandler() {
+    setLogin(true);
+  }
+  async function signup() {
+    let valid = true;
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      valid = false;
+    }
+
+    if (!password || password.length < 6) {
+      setPasswordError("Password must be at least 6 characters long.");
+      valid = false;
+    }
+
+    if (!login) {
+      if (password !== confirmPassword) {
+        setConfirmPasswordError("Passwords do not match.");
+        valid = false;
+      }
+    }
+
+    if (!valid) return;
+
+    const data = {
+      email: email,
+      password: password,
+    };
+
+    setIsSubmitting(true);
+    try {
+      if (!login) {
+        const res = await axios.post("http://localhost:8000/signup", data);
+        // Replace alert with console.log as placeholder
+        console.log("You are successfully signed up, please login now");
+        setLogin(true);
+      } else {
+        const res = await axios.post("http://localhost:8000/login", data);
+        // Use navigate instead of window.location.href
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.status === 400) {
+          console.log("User already exists or invalid signup data");
+        } else {
+          console.log("An unexpected error occurred. Please try again.");
+        }
+      } else {
+        console.log("An unexpected error occurred. Please try again.");
+      }
+    }
+    setIsSubmitting(false);
+  }
+  function passwordHanlder(event) {
+    setPassword(event.target.value);
+  }
+  function emailHanlder(event) {
+    setEmail(event.target.value);
+  }
   return (
     <div className="container  mb-5">
       <div className="row text-center p-5">
@@ -21,28 +100,93 @@ function Signup() {
           />
         </div>
         <div className="col-6">
-          <h2 className="mb-2">Signup Now</h2>
-          <p className="mb-3">Or track your existing application</p>
+          <h2 className="mb-2">{login ? "Login Now" : "Signup Now"}</h2>
+          <span style={{ display: "flex", flexWrap: "wrap" }}>
+            {!login ? (
+              <>
+                <p className="mb-3">
+                  For existing user{" "}
+                  <button onClick={loginHandler} class="btn btn-primary btn-md">
+                    login
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mb-3">
+                  For new user{" "}
+                  <button
+                    onClick={signupHandler}
+                    class="btn btn-primary btn-md"
+                  >
+                    Signup
+                  </button>
+                </p>
+              </>
+            )}
+          </span>
+
           <div class="form-floating mb-3">
             <input
+              onChange={emailHanlder}
+              value={email}
               type="email"
               class="form-control"
               id="floatingInput"
               placeholder="name@example.com"
             />
             <label for="floatingInput">Email address</label>
+            {emailError && <div className="text-danger mt-1">{emailError}</div>}
           </div>
           <div class="form-floating">
             <input
-              type="password"
+              onChange={passwordHanlder}
+              value={password}
+              type={showPassword ? "text" : "password"}
               class="form-control"
               id="floatingPassword"
               placeholder="Password"
             />
             <label for="floatingPassword">Password</label>
+            {passwordError && (
+              <div className="text-danger mt-1">{passwordError}</div>
+            )}
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm mt-2"
+              style={{
+                position: "absolute",
+                right: 15,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+            {!login && (
+              <div className="form-floating mt-3">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <label>Confirm Password</label>
+                {confirmPasswordError && (
+                  <div className="text-danger mt-1">{confirmPasswordError}</div>
+                )}
+              </div>
+            )}
             <div class="col-auto">
-              <button type="submit" class="btn btn-primary btn-lg mb-3 mt-4">
-                Signup
+              <button
+                onClick={signup}
+                type="submit"
+                class="btn btn-primary btn-lg mb-3 mt-4"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Please wait..." : login ? "Signin" : "Signup"}
               </button>
               <p className="">
                 By proceeding, you agree to the Zerodha{" "}
