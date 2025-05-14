@@ -1,5 +1,65 @@
 export const watchlist = [
   {
+    name: "ADANIENT",
+    price: 2803.75,
+    percent: "1.27%",
+    isDown: false,
+  },
+  {
+    name: "BAJFINANCE",
+    price: 7050.3,
+    percent: "-0.95%",
+    isDown: true,
+  },
+  {
+    name: "HDFCBANK",
+    price: 1522.35,
+    percent: "0.11%",
+    isDown: false,
+  },
+  {
+    name: "ITC",
+    price: 407.15,
+    percent: "-0.47%",
+    isDown: true,
+  },
+  {
+    name: "LT",
+    price: 3238.0,
+    percent: "0.69%",
+    isDown: false,
+  },
+  {
+    name: "COALINDIA",
+    price: 460.85,
+    percent: "-1.13%",
+    isDown: true,
+  },
+  {
+    name: "IOC",
+    price: 170.25,
+    percent: "0.85%",
+    isDown: false,
+  },
+  {
+    name: "POWERGRID",
+    price: 276.1,
+    percent: "-0.34%",
+    isDown: true,
+  },
+  {
+    name: "SBIN",
+    price: 645.75,
+    percent: "0.41%",
+    isDown: false,
+  },
+  {
+    name: "TATAMOTORS",
+    price: 980.5,
+    percent: "2.10%",
+    isDown: false,
+  },
+  {
     name: "INFY",
     price: 1555.45,
     percent: "-1.60%",

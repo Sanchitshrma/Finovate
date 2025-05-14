@@ -130,7 +130,7 @@ const WatchListActions = ({ uid }) => {
   const generalContext = useContext(GeneralContext);
 
   const handleSellClick = () => {
-    generalContext.openBuyWindow(uid);
+    generalContext.openSellWindow(uid);
   };
 
   const handleBuyClick = () => {
