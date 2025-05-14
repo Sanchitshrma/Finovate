@@ -198,20 +198,58 @@ app.get("/allPositions", async (req, res) => {
   res.json(allPositions);
 });
 
-app.post("/newOrder", (req, res) => {
-  let newOrder = new OrdersModel({
-    name: req.body.name,
-    qty: req.body.qty,
-    price: req.body.price,
-    mode: req.body.mode,
+// app.post("/newOrder", (req, res) => {
+//   let newOrder = new OrdersModel({
+//     name: req.body.name,
+//     qty: req.body.qty,
+//     price: req.body.price,
+//     mode: req.body.mode,
+//   });
+
+//   newOrder.save();
+
+//   res.send("Order Saved");
+// });
+
+app.post("/newOrder", async (req, res) => {
+  const { name, qty, price, mode } = req.body;
+
+  const newOrder = new OrdersModel({
+    name,
+    qty,
+    price,
+    mode,
+    date: new Date(),
   });
 
-  newOrder.save();
-
-  res.send("Order Saved");
+  try {
+    await newOrder.save();
+    res.status(201).send("Order saved");
+  } catch (err) {
+    res.status(500).send("Failed to save order");
+  }
 });
 
-app.post("/sellOrder", (req, res) => {});
+app.get("/orders", async (req, res) => {
+  try {
+    const orders = await OrdersModel.find().sort({ date: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).send("Failed to fetch orders");
+  }
+});
+
+app.get("/holdings/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userHoldings = await HoldingsModel.find({ userId });
+    res.json(userHoldings);
+  } catch (err) {
+    res.status(500).send("Failed to fetch holdings");
+  }
+});
+
 app.post("/signup", async (req, res) => {
   const email = req.body.email;
   const findEmail = await UserData.find({ email: email });
