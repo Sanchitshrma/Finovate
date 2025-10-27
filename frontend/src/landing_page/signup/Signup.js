@@ -3,6 +3,10 @@ import OpenAccount from "../OpenAccount";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../components/Toast";
+
+// Environment variables for API URLs
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL || 'http://localhost:3000';
 function Signup() {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -108,7 +112,7 @@ function Signup() {
     setIsSubmitting(true);
     try {
       if (!login) {
-        const res = await axios.post("http://localhost:8000/signup", data);
+        const res = await axios.post(`${BACKEND_URL}/signup`, data);
         // Store JWT token in localStorage
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
@@ -119,10 +123,10 @@ function Signup() {
         // Redirect to dashboard app (runs on port 3000) with token and user data
         setTimeout(() => {
           const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
-          window.location.href = `http://localhost:3000?token=${res.data.token}&user=${userEncoded}`;
+          window.location.href = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
         }, 1500);
       } else {
-        const res = await axios.post("http://localhost:8000/login", data);
+        const res = await axios.post(`${BACKEND_URL}/login`, data);
         // Store JWT token in localStorage
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
@@ -132,7 +136,7 @@ function Signup() {
         showToast("Login successful! Redirecting...", "success");
         setTimeout(() => {
           const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
-          window.location.href = `http://localhost:3000?token=${res.data.token}&user=${userEncoded}`;
+          window.location.href = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
         }, 1500);
       }
     } catch (error) {

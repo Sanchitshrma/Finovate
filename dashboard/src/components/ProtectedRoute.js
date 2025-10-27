@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import api from "../utils/axios";
 
+const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3001';
+
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,7 +74,7 @@ const ProtectedRoute = ({ children }) => {
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     // Redirect to frontend login page
-    window.location.href = "http://localhost:3001/signup";
+    window.location.href = `${FRONTEND_URL}/signup`;
     return null;
   }
 

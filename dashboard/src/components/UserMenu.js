@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserMenu.css";
 
+const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3001';
+
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -45,7 +47,7 @@ const UserMenu = () => {
     localStorage.removeItem("user");
     
     // Redirect to frontend signup page
-    window.location.href = "http://localhost:3001/signup";
+    window.location.href = `${FRONTEND_URL}/signup`;
   };
 
   const handleProfile = () => {
