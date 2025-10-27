@@ -7,6 +7,13 @@ import Toast from "../../components/Toast";
 // Environment variables for API URLs
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL || 'http://localhost:3000';
+
+// Debug logging
+console.log('Environment Check:');
+console.log('BACKEND_URL:', BACKEND_URL);
+console.log('DASHBOARD_URL:', DASHBOARD_URL);
+console.log('process.env.REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+console.log('process.env.REACT_APP_DASHBOARD_URL:', process.env.REACT_APP_DASHBOARD_URL);
 function Signup() {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -123,7 +130,9 @@ function Signup() {
         // Redirect to dashboard app (runs on port 3000) with token and user data
         setTimeout(() => {
           const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
-          window.location.href = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
+          const redirectUrl = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
+          console.log('Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
         }, 1500);
       } else {
         const res = await axios.post(`${BACKEND_URL}/login`, data);
@@ -136,7 +145,9 @@ function Signup() {
         showToast("Login successful! Redirecting...", "success");
         setTimeout(() => {
           const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
-          window.location.href = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
+          const redirectUrl = `${DASHBOARD_URL}?token=${res.data.token}&user=${userEncoded}`;
+          console.log('Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
         }, 1500);
       }
     } catch (error) {
