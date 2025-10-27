@@ -1,35 +1,72 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axios";
 
 import GeneralContext from "./GeneralContext";
+import Modal from "./Modal";
+import { watchlist } from "../data/data";
 import "./BuyActionWindow.css";
 
 const BuyActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
+  const [modal, setModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
   const { closeBuyWindow } = useContext(GeneralContext);
 
+  // Auto-populate price from watchlist
+  useEffect(() => {
+    const stock = watchlist.find((s) => s.name === uid);
+    if (stock) {
+      setStockPrice(stock.price);
+    }
+  }, [uid]);
+
   const handleBuyClick = async () => {
     if (stockQuantity <= 0 || stockPrice <= 0) {
-      alert("Please enter valid quantity and price.");
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Invalid Input',
+        message: 'Please enter valid quantity and price.'
+      });
       return;
     }
 
     try {
-      await axios.post("http://localhost:8000/newOrder", {
+      await api.post("/newOrder", {
         name: uid,
         qty: stockQuantity,
         price: stockPrice,
         mode: "BUY",
       });
 
-      closeBuyWindow();
+      setModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Success!',
+        message: 'Stock purchased successfully!'
+      });
+      
+      // Close window and reload after modal is acknowledged
+      setTimeout(() => {
+        closeBuyWindow();
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       console.error("Order failed:", error);
-      alert("Failed to place order.");
+      const errorMessage = error.response?.data?.message || "Failed to place order. Please try again.";
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Order Failed',
+        message: errorMessage
+      });
     }
+  };
+
+  const handleModalClose = () => {
+    setModal({ ...modal, isOpen: false });
   };
 
   const handleCancelClick = () => {
@@ -37,8 +74,16 @@ const BuyActionWindow = ({ uid }) => {
   };
 
   return (
-    <div className="container buy-sell-window" draggable="true">
-      <h2 className="window-title">Buy Stocks</h2>
+    <>
+      <Modal 
+        isOpen={modal.isOpen}
+        onClose={handleModalClose}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+      />
+      <div className="container buy-sell-window" draggable="true">
+      <h2 className="window-title">Buy {uid}</h2>
       <div className="form-section">
         <div className="form-group">
           <label htmlFor="qty">Quantity</label>
@@ -66,7 +111,9 @@ const BuyActionWindow = ({ uid }) => {
       </div>
 
       <div className="buttons">
-        <span className="margin-info">Margin required ₹140.65</span>
+        <span className="margin-info">
+          Total: ₹{(stockQuantity * stockPrice).toFixed(2)}
+        </span>
         <div className="btn-group">
           <Link className="btn btn-blue" onClick={handleBuyClick}>
             Buy
@@ -77,6 +124,7 @@ const BuyActionWindow = ({ uid }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

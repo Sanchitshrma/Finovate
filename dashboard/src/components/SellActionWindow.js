@@ -1,22 +1,24 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axios";
 
 import GeneralContext from "./GeneralContext";
+import Modal from "./Modal";
+import { watchlist } from "../data/data";
 import "./BuyActionWindow.css";
 
 const SellActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
+  const [modal, setModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
   const [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
     const fetchHoldings = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8000/holdings/sanchit123"
-        ); // use real user ID
+        // Get holdings for current user
+        const res = await api.get("/allHoldings");
         setHoldings(res.data);
       } catch (err) {
         console.error("Failed to fetch holdings", err);
@@ -24,7 +26,13 @@ const SellActionWindow = ({ uid }) => {
     };
 
     fetchHoldings();
-  }, []);
+
+    // Auto-populate price from watchlist
+    const stock = watchlist.find((s) => s.name === uid);
+    if (stock) {
+      setStockPrice(stock.price);
+    }
+  }, [uid]);
 
   const stock = holdings.find(item => item.name === uid);
   const availableQty = stock ? stock.qty : 0;
@@ -33,28 +41,59 @@ const SellActionWindow = ({ uid }) => {
 
   const handleSellClick = async () => {
     if (stockQuantity <= 0 || stockPrice <= 0) {
-      alert("Please enter valid quantity and price.");
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Invalid Input',
+        message: 'Please enter valid quantity and price.'
+      });
       return;
     }
 
     if (stockQuantity > availableQty) {
-      alert("You can't sell more than you own.");
+      setModal({
+        isOpen: true,
+        type: 'warning',
+        title: 'Insufficient Quantity',
+        message: `You only have ${availableQty} shares available to sell.`
+      });
       return;
     }
 
     try {
-      await axios.post("http://localhost:8000/newOrder", {
+      await api.post("/newOrder", {
         name: uid,
         qty: stockQuantity,
         price: stockPrice,
         mode: "SELL",
       });
 
-      closeSellWindow();
+      setModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Success!',
+        message: 'Stock sold successfully!'
+      });
+      
+      // Close window and reload after modal is acknowledged
+      setTimeout(() => {
+        closeSellWindow();
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       console.error("Order failed:", error);
-      alert("Failed to place order.");
+      const errorMessage = error.response?.data?.message || "Failed to place order. Please try again.";
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Order Failed',
+        message: errorMessage
+      });
     }
+  };
+
+  const handleModalClose = () => {
+    setModal({ ...modal, isOpen: false });
   };
 
   const handleCancelClick = () => {
@@ -62,8 +101,16 @@ const SellActionWindow = ({ uid }) => {
   };
 
   return (
-    <div className="container buy-sell-window" draggable="true">
-      <h2 className="window-title">Sell Stocks</h2>
+    <>
+      <Modal 
+        isOpen={modal.isOpen}
+        onClose={handleModalClose}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+      />
+      <div className="container buy-sell-window" draggable="true">
+      <h2 className="window-title">Sell {uid}</h2>
       <p className="available-info">Available Quantity: {availableQty}</p>
       <div className="form-section">
         <div className="form-group">
@@ -105,6 +152,7 @@ const SellActionWindow = ({ uid }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

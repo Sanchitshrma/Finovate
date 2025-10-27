@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axios";
 // import "./Orders.css";
 
 const Orders = () => {
@@ -9,7 +9,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/orders"); // Ensure this endpoint exists
+        const res = await api.get("/orders");
         setOrders(res.data);
       } catch (err) {
         console.error("Failed to fetch orders:", err);

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import OpenAccount from "../OpenAccount";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Toast from "../../components/Toast";
 function Signup() {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -12,7 +13,35 @@ function Signup() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+  };
+
+  const closeToast = () => {
+    setToast(null);
+  };
+
+  // Calculate password strength
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { strength: 0, label: '', color: '' };
+    
+    let strength = 0;
+    if (pwd.length >= 6) strength++;
+    if (pwd.length >= 10) strength++;
+    if (/[a-z]/.test(pwd)) strength++;
+    if (/[A-Z]/.test(pwd)) strength++;
+    if (/\d/.test(pwd)) strength++;
+    if (/[^a-zA-Z\d]/.test(pwd)) strength++;
+    
+    if (strength <= 2) return { strength, label: 'Weak', color: '#ef4444' };
+    if (strength <= 4) return { strength, label: 'Medium', color: '#f59e0b' };
+    return { strength, label: 'Strong', color: '#10b981' };
+  };
+
+  const passwordStrength = getPasswordStrength(password);
   function signupHandler() {
     setLogin(false);
   }
@@ -25,24 +54,51 @@ function Signup() {
     setPasswordError("");
     setConfirmPasswordError("");
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    // Email validation
+    if (!email) {
+      setEmailError("Email is required.");
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailError("Please enter a valid email address.");
       valid = false;
     }
 
-    if (!password || password.length < 6) {
+    // Password validation
+    if (!password) {
+      setPasswordError("Password is required.");
+      valid = false;
+    } else if (password.length < 6) {
       setPasswordError("Password must be at least 6 characters long.");
       valid = false;
+    } else if (!login) {
+      // Strict validation only for signup
+      if (!/(?=.*[a-z])/.test(password)) {
+        setPasswordError("Password must contain at least one lowercase letter.");
+        valid = false;
+      } else if (!/(?=.*[A-Z])/.test(password)) {
+        setPasswordError("Password must contain at least one uppercase letter.");
+        valid = false;
+      } else if (!/(?=.*\d)/.test(password)) {
+        setPasswordError("Password must contain at least one number.");
+        valid = false;
+      }
     }
 
+    // Confirm password validation (only for signup)
     if (!login) {
-      if (password !== confirmPassword) {
+      if (!confirmPassword) {
+        setConfirmPasswordError("Please confirm your password.");
+        valid = false;
+      } else if (password !== confirmPassword) {
         setConfirmPasswordError("Passwords do not match.");
         valid = false;
       }
     }
 
-    if (!valid) return;
+    if (!valid) {
+      showToast("Please fix the errors in the form.", "error");
+      return;
+    }
 
     const data = {
       email: email,
@@ -53,26 +109,46 @@ function Signup() {
     try {
       if (!login) {
         const res = await axios.post("http://localhost:8000/signup", data);
-        // Replace alert with console.log as placeholder
-        console.log("You are successfully signed up, please login now");
-        setLogin(true);
+        // Store JWT token in localStorage
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
+        console.log("You are successfully signed up!");
+        showToast("Account created successfully! Redirecting...", "success");
+        // Redirect to dashboard app (runs on port 3000) with token and user data
+        setTimeout(() => {
+          const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
+          window.location.href = `http://localhost:3000?token=${res.data.token}&user=${userEncoded}`;
+        }, 1500);
       } else {
         const res = await axios.post("http://localhost:8000/login", data);
-        // Use navigate instead of window.location.href
-        navigate("/dashboard");
+        // Store JWT token in localStorage
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
+        // Redirect to dashboard app (runs on port 3000) with token and user data
+        showToast("Login successful! Redirecting...", "success");
+        setTimeout(() => {
+          const userEncoded = encodeURIComponent(JSON.stringify(res.data.user));
+          window.location.href = `http://localhost:3000?token=${res.data.token}&user=${userEncoded}`;
+        }, 1500);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response && error.response.status === 400) {
-          console.log("User already exists or invalid signup data");
+          const errorMsg = error.response.data.message || "Invalid credentials or user already exists";
+          showToast(errorMsg, "error");
         } else {
-          console.log("An unexpected error occurred. Please try again.");
+          showToast("An unexpected error occurred. Please try again.", "error");
         }
       } else {
-        console.log("An unexpected error occurred. Please try again.");
+        showToast("Network error. Please check your connection.", "error");
       }
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   }
   function passwordHanlder(event) {
     setPassword(event.target.value);
@@ -81,7 +157,9 @@ function Signup() {
     setEmail(event.target.value);
   }
   return (
-    <div className="container  mb-5">
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+      <div className="container  mb-5">
       <div className="row text-center p-5">
         <h1 className=" mb-4 mt-5" style={{ fontSize: "3.5rem" }}>
           Open a free demat and trading account online
@@ -150,6 +228,34 @@ function Signup() {
             <label for="floatingPassword">Password</label>
             {passwordError && (
               <div className="text-danger mt-1">{passwordError}</div>
+            )}
+            {!login && password && (
+              <div className="mt-2" style={{ fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ 
+                    flex: 1, 
+                    height: '4px', 
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${(passwordStrength.strength / 6) * 100}%`,
+                      height: '100%',
+                      backgroundColor: passwordStrength.color,
+                      transition: 'all 0.3s ease'
+                    }} />
+                  </div>
+                  <span style={{ color: passwordStrength.color, fontWeight: '500' }}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+              </div>
+            )}
+            {!login && !passwordError && (
+              <div className="mt-2" style={{ fontSize: '12px', color: '#6b7280' }}>
+                Must contain uppercase, lowercase, and number
+              </div>
             )}
             <button
               type="button"
@@ -338,6 +444,7 @@ function Signup() {
       </div> */}
       <OpenAccount />
     </div>
+    </>
   );
 }
 

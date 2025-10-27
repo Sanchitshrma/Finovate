@@ -5,11 +5,14 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const { HoldingsModel } = require("./models/HoldingsModel");
 const { PositionsModel } = require("./models/PositionsModel");
 const { OrdersModel } = require("./models/OrdersModel");
 const UserData = require("./models/UserModel");
+const { WatchlistModel } = require("./models/WatchlistModel");
+const { authenticateToken } = require("./middleware/auth");
 
 const PORT = 8000;
 const uri = process.env.MONGODB_URL;
@@ -187,15 +190,85 @@ app.use(bodyParser.json());
 //   res.send("Done!");
 // });
 
-app.get("/allHoldings", async (req, res) => {
-  let allHoldings = await HoldingsModel.find({});
-  res.json(allHoldings);
-  console.log("Done");
+// Watchlist routes
+app.get("/watchlist", authenticateToken, async (req, res) => {
+  try {
+    const watchlist = await WatchlistModel.find({ userId: req.user.id }).sort({ addedAt: -1 });
+    res.json(watchlist.map(item => item.symbol));
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch watchlist" });
+  }
 });
 
-app.get("/allPositions", async (req, res) => {
-  let allPositions = await PositionsModel.find({});
-  res.json(allPositions);
+app.post("/watchlist", authenticateToken, async (req, res) => {
+  try {
+    const { symbol } = req.body;
+    
+    if (!symbol) {
+      return res.status(400).json({ message: "Stock symbol is required" });
+    }
+
+    // Check if already in watchlist
+    const existing = await WatchlistModel.findOne({ 
+      userId: req.user.id, 
+      symbol: symbol.toUpperCase() 
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "Stock already in watchlist" });
+    }
+
+    const watchlistItem = new WatchlistModel({
+      userId: req.user.id,
+      symbol: symbol.toUpperCase(),
+    });
+
+    await watchlistItem.save();
+    res.status(201).json({ message: "Stock added to watchlist", symbol: symbol.toUpperCase() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to add stock to watchlist" });
+  }
+});
+
+app.delete("/watchlist/:symbol", authenticateToken, async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    
+    const result = await WatchlistModel.findOneAndDelete({
+      userId: req.user.id,
+      symbol: symbol.toUpperCase(),
+    });
+
+    if (!result) {
+      return res.status(404).json({ message: "Stock not found in watchlist" });
+    }
+
+    res.json({ message: "Stock removed from watchlist" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to remove stock from watchlist" });
+  }
+});
+
+app.get("/allHoldings", authenticateToken, async (req, res) => {
+  try {
+    // Get holdings for the authenticated user
+    let allHoldings = await HoldingsModel.find({ userId: req.user.id });
+    res.json(allHoldings);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch holdings" });
+  }
+});
+
+app.get("/allPositions", authenticateToken, async (req, res) => {
+  try {
+    // Get positions for the authenticated user
+    let allPositions = await PositionsModel.find({ userId: req.user.id });
+    res.json(allPositions);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch positions" });
+  }
 });
 
 // app.post("/newOrder", (req, res) => {
@@ -211,35 +284,93 @@ app.get("/allPositions", async (req, res) => {
 //   res.send("Order Saved");
 // });
 
-app.post("/newOrder", async (req, res) => {
+app.post("/newOrder", authenticateToken, async (req, res) => {
   const { name, qty, price, mode } = req.body;
-
-  const newOrder = new OrdersModel({
-    name,
-    qty,
-    price,
-    mode,
-    date: new Date(),
-  });
+  const userId = req.user.id;
 
   try {
+    // Save the order
+    const newOrder = new OrdersModel({
+      userId,
+      name,
+      qty,
+      price,
+      mode,
+      date: new Date(),
+    });
     await newOrder.save();
-    res.status(201).send("Order saved");
+
+    // Update holdings based on buy/sell
+    if (mode === "BUY") {
+      // Check if user already has this stock
+      let existingHolding = await HoldingsModel.findOne({ userId, name });
+
+      if (existingHolding) {
+        // Update existing holding - calculate new average price
+        const totalQty = existingHolding.qty + qty;
+        const totalCost = existingHolding.avg * existingHolding.qty + price * qty;
+        const newAvg = totalCost / totalQty;
+
+        existingHolding.qty = totalQty;
+        existingHolding.avg = newAvg;
+        existingHolding.price = price;
+        await existingHolding.save();
+      } else {
+        // Create new holding
+        const newHolding = new HoldingsModel({
+          userId,
+          name,
+          qty,
+          avg: price,
+          price: price,
+          net: "0.00%",
+          day: "0.00%",
+        });
+        await newHolding.save();
+      }
+    } else if (mode === "SELL") {
+      // Find existing holding
+      let existingHolding = await HoldingsModel.findOne({ userId, name });
+
+      if (existingHolding) {
+        if (existingHolding.qty >= qty) {
+          // Reduce quantity
+          existingHolding.qty -= qty;
+
+          if (existingHolding.qty === 0) {
+            // Remove holding if quantity becomes 0
+            await HoldingsModel.deleteOne({ _id: existingHolding._id });
+          } else {
+            // Update price
+            existingHolding.price = price;
+            await existingHolding.save();
+          }
+        } else {
+          return res.status(400).json({ message: "Insufficient quantity to sell" });
+        }
+      } else {
+        return res.status(400).json({ message: "You don't own this stock" });
+      }
+    }
+
+    res.status(201).json({ message: "Order placed successfully" });
   } catch (err) {
-    res.status(500).send("Failed to save order");
+    console.error(err);
+    res.status(500).json({ message: "Failed to place order" });
   }
 });
 
-app.get("/orders", async (req, res) => {
+app.get("/orders", authenticateToken, async (req, res) => {
   try {
-    const orders = await OrdersModel.find().sort({ date: -1 });
+    // Get orders for the authenticated user
+    const orders = await OrdersModel.find({ userId: req.user.id }).sort({ date: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).send("Failed to fetch orders");
+    res.status(500).json({ message: "Failed to fetch orders" });
   }
 });
 
-app.get("/holdings/:userId", async (req, res) => {
+app.get("/holdings/:userId", authenticateToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -254,16 +385,27 @@ app.post("/signup", async (req, res) => {
   const email = req.body.email;
   const findEmail = await UserData.find({ email: email });
   if (findEmail.length > 0) {
-    return res.status(400).send("User already exist");
+    return res.status(400).json({ message: "User already exist" });
   } else {
-    let newOrder = new UserData({
+    let newUser = new UserData({
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
     });
 
-    await newOrder.save();
+    await newUser.save();
 
-    return res.send("success");
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    return res.status(201).json({
+      message: "success",
+      token: token,
+      user: { id: newUser._id, email: newUser.email },
+    });
   }
 });
 
@@ -273,15 +415,79 @@ app.post("/login", async (req, res) => {
   const findEmail = await UserData.find({ email: email });
   if (findEmail.length > 0) {
     if (await bcrypt.compareSync(password, findEmail[0].password)) {
-      return res.status(200).send("User found");
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: findEmail[0]._id, email: findEmail[0].email },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+
+      return res.status(200).json({
+        message: "User found",
+        token: token,
+        user: { id: findEmail[0]._id, email: findEmail[0].email },
+      });
     } else {
-      return res.status(400).send("Password not match");
+      return res.status(400).json({ message: "Password not match" });
     }
   } else {
-    return res.status(400).send("User not found");
+    return res.status(400).json({ message: "User not found" });
   }
+});
 
-  res.send("User data Sucessfully");
+// Verify token endpoint
+app.get("/verify", authenticateToken, (req, res) => {
+  // If authenticateToken middleware passes, token is valid
+  res.json({
+    valid: true,
+    user: { id: req.user.id, email: req.user.email },
+  });
+});
+
+// Add sample positions for testing (DEVELOPMENT ONLY)
+app.post("/addSamplePositions", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Clear existing positions
+    await PositionsModel.deleteMany({ userId });
+
+    // Sample positions
+    const samplePositions = [
+      {
+        userId,
+        product: "MIS", // Intraday
+        name: "EVEREADY",
+        qty: 2,
+        avg: 316.27,
+        price: 312.35,
+        net: "-1.24%",
+        day: "-1.24%",
+        isLoss: true,
+      },
+      {
+        userId,
+        product: "CNC", // Delivery
+        name: "JUBLFOOD",
+        qty: 1,
+        avg: 3124.75,
+        price: 3082.65,
+        net: "-1.35%",
+        day: "-1.35%",
+        isLoss: true,
+      },
+    ];
+
+    await PositionsModel.insertMany(samplePositions);
+
+    res.status(201).json({ 
+      message: "Sample positions added successfully",
+      count: samplePositions.length 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to add sample positions" });
+  }
 });
 
 app.listen(PORT, () => {

@@ -1,23 +1,135 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import GeneralContext from "./GeneralContext";
 
 import { Tooltip, Grow } from "@mui/material";
 
-import { watchlist } from "../data/data";
+import { watchlist as staticWatchlist } from "../data/data";
+import { getBatchStockPrices } from "../services/stockService";
+import api from "../utils/axios";
+import AddStockModal from "./AddStockModal";
 
 import {
   BarChartOutlined,
   KeyboardArrowDown,
   KeyboardArrowUp,
   MoreHoriz,
-  // MoreHorizOutlined,
 } from "@mui/icons-material";
 import { DoughnutChart } from "./DoughnutChart";
 
-const labels = watchlist.map((subArray) => subArray["name"]);
-
 const WatchList = () => {
+  const [watchlist, setWatchlist] = useState([]);
+  const [userWatchlistSymbols, setUserWatchlistSymbols] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const refreshInterval = parseInt(process.env.REACT_APP_PRICE_REFRESH_INTERVAL || '30') * 1000;
+
+  // Fetch user's watchlist from backend
+  const fetchUserWatchlist = async () => {
+    try {
+      const response = await api.get("/watchlist");
+      setUserWatchlistSymbols(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch user watchlist:', error);
+      return [];
+    }
+  };
+
+  // Fetch real-time prices for user's watchlist
+  const updatePrices = async (symbols = userWatchlistSymbols) => {
+    try {
+      setLoading(true);
+      
+      if (symbols.length === 0) {
+        setWatchlist([]);
+        return;
+      }
+
+      // Filter static watchlist to only include user's stocks
+      const userStocks = staticWatchlist.filter(stock => 
+        symbols.includes(stock.name)
+      );
+
+      const fallbackPrices = {};
+      userStocks.forEach(stock => {
+        fallbackPrices[stock.name] = stock.price;
+      });
+
+      const priceData = await getBatchStockPrices(symbols, fallbackPrices);
+      
+      // Update watchlist with new prices
+      const updatedWatchlist = symbols.map((symbol, index) => {
+        const stockInfo = staticWatchlist.find(s => s.name === symbol) || {
+          name: symbol,
+          price: 0,
+          percent: "0%",
+          isDown: false,
+        };
+        
+        const liveData = priceData[index];
+        if (liveData) {
+          return {
+            ...stockInfo,
+            price: liveData.price,
+            percent: liveData.changePercent,
+            isDown: liveData.change < 0,
+            lastUpdated: liveData.timestamp,
+            isSimulated: liveData.isSimulated || false,
+          };
+        }
+        return stockInfo;
+      });
+
+      setWatchlist(updatedWatchlist);
+    } catch (error) {
+      console.error('Failed to update prices:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load of user watchlist
+  useEffect(() => {
+    const initializeWatchlist = async () => {
+      const symbols = await fetchUserWatchlist();
+      if (symbols.length > 0) {
+        await updatePrices(symbols);
+      }
+    };
+    initializeWatchlist();
+  }, []);
+
+  // Periodic price updates
+  useEffect(() => {
+    if (userWatchlistSymbols.length === 0) return;
+    
+    const interval = setInterval(() => {
+      updatePrices(userWatchlistSymbols);
+    }, refreshInterval);
+    
+    return () => clearInterval(interval);
+  }, [userWatchlistSymbols, refreshInterval]);
+
+  // Handle adding stock
+  const handleStockAdded = async (symbol) => {
+    const updatedSymbols = await fetchUserWatchlist();
+    await updatePrices(updatedSymbols);
+  };
+
+  // Handle removing stock
+  const handleRemoveStock = async (symbol) => {
+    try {
+      await api.delete(`/watchlist/${symbol}`);
+      const updatedSymbols = await fetchUserWatchlist();
+      await updatePrices(updatedSymbols);
+    } catch (error) {
+      console.error('Failed to remove stock:', error);
+      alert('Failed to remove stock from watchlist');
+    }
+  };
+
+  const labels = watchlist.map((stock) => stock.name);
   const data = {
     labels,
     datasets: [
@@ -74,29 +186,58 @@ const WatchList = () => {
   return (
     <div className="watchlist-container">
       <div className="search-container">
-        <input
-          type="text"
-          name="search"
-          id="search"
-          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
-          className="search"
-        />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <button 
+          className="add-stock-button"
+          onClick={() => setIsAddModalOpen(true)}
+          title="Add stock to watchlist"
+        >
+          + Add Stock
+        </button>
+        <span className="counts">
+          {watchlist.length} / 50
+          {loading && <span style={{ marginLeft: '10px', fontSize: '12px' }}>🔄</span>}
+        </span>
       </div>
 
-      <ul className="list">
-        {watchlist.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
-        })}
-      </ul>
-      <DoughnutChart data={data} />
+      {watchlist.length === 0 ? (
+        <div className="empty-watchlist">
+          <p>Your watchlist is empty</p>
+          <button 
+            className="add-first-stock"
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            + Add your first stock
+          </button>
+        </div>
+      ) : (
+        <>
+          <ul className="list">
+            {watchlist.map((stock, index) => {
+              return (
+                <WatchListItem 
+                  stock={stock} 
+                  key={index} 
+                  onRemove={handleRemoveStock}
+                />
+              );
+            })}
+          </ul>
+          <DoughnutChart data={data} />
+        </>
+      )}
+      
+      <AddStockModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onStockAdded={handleStockAdded}
+      />
     </div>
   );
 };
 
 export default WatchList;
 
-const WatchListItem = ({ stock }) => {
+const WatchListItem = ({ stock, onRemove }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
 
   const handelMouseEnter = (e) => {
@@ -105,6 +246,13 @@ const WatchListItem = ({ stock }) => {
 
   const handelMouseLeave = (e) => {
     setShowWatchlistActions(false);
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    if (window.confirm(`Remove ${stock.name} from watchlist?`)) {
+      onRemove(stock.name);
+    }
   };
 
   return (
@@ -121,7 +269,18 @@ const WatchListItem = ({ stock }) => {
           <span className="price">{stock.price}</span>
         </div>
       </div>
-      {showWatchlistActions && <WatchListActions uid={stock.name} />}
+      {showWatchlistActions && (
+        <>
+          <button 
+            className="delete-button"
+            onClick={handleDelete}
+            title="Remove from watchlist"
+          >
+            ×
+          </button>
+          <WatchListActions uid={stock.name} />
+        </>
+      )}
     </li>
   );
 };

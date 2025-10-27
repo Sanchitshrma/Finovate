@@ -1,17 +1,63 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../utils/axios";
 import { VerticalGraph } from "./VerticalGraph";
+import { getBatchStockPrices, calculateProfitLoss } from "../services/stockService";
 
 // import { holdings } from "../data/data";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch holdings and update with real-time prices
+  const fetchHoldings = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/allHoldings`);
+      const holdings = response.data;
+
+      if (holdings.length > 0) {
+        // Get real-time prices for all stocks
+        const symbols = holdings.map(h => h.name);
+        const fallbackPrices = {};
+        holdings.forEach(h => {
+          fallbackPrices[h.name] = h.price;
+        });
+
+        const priceData = await getBatchStockPrices(symbols, fallbackPrices);
+        
+        // Update holdings with live prices
+        const updatedHoldings = holdings.map((holding, index) => {
+          const liveData = priceData[index];
+          if (liveData) {
+            const profitLoss = calculateProfitLoss(holding.avg, liveData.price);
+            return {
+              ...holding,
+              price: liveData.price,
+              net: `${profitLoss.isProfit ? '+' : ''}${profitLoss.percent}%`,
+              day: liveData.changePercent,
+              isLoss: !profitLoss.isProfit,
+            };
+          }
+          return holding;
+        });
+
+        setAllHoldings(updatedHoldings);
+      } else {
+        setAllHoldings(holdings);
+      }
+    } catch (error) {
+      console.error('Failed to fetch holdings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/allHoldings`).then((res) => {
-      // console.log(res.data);
-      setAllHoldings(res.data);
-    });
+    fetchHoldings();
+    // Refresh every minute
+    const interval = setInterval(fetchHoldings, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
@@ -46,7 +92,10 @@ const Holdings = () => {
 
   return (
     <>
-      <h3 className="title">Holdings ({allHoldings.length})</h3>
+      <h3 className="title">
+        Holdings ({allHoldings.length})
+        {loading && <span style={{ marginLeft: '10px', fontSize: '14px' }}>🔄</span>}
+      </h3>
 
       <div className="order-table">
         <table>
