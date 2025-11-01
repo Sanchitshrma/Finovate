@@ -2,7 +2,8 @@ import axios from "axios";
 
 // Create axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  // Use environment variable in production; fallback to localhost for local dev
+  baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:8000",
 });
 
 // Add request interceptor to attach JWT token

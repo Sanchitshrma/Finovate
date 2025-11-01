@@ -24,13 +24,15 @@ MONGODB_URL=your_mongo_connection_string
 JWT_SECRET=your_jwt_secret_key
 ```
 
+> Tests/Lint: No backend test or lint scripts are defined.
+
 ### Frontend (Marketing Site)
 ```bash
 cd frontend
 npm install
 npm start  # Runs on port 3001
 npm run build  # Production build
-npm test  # Run tests
+npm test  # Jest (via CRA) in watch mode
 ```
 
 ### Dashboard (Trading Interface)
@@ -39,8 +41,25 @@ cd dashboard
 npm install
 npm start  # Runs on port 3000
 npm run build  # Production build
-npm test  # Run tests
+npm test  # Jest (via CRA) in watch mode
 ```
+
+### Testing (Frontend + Dashboard)
+- Run once (no watch):
+```bash
+npm test -- --watchAll=false
+```
+- Run a single test file:
+```bash
+npm test -- -- src/<file>.test.js
+```
+- Run tests matching a name/pattern:
+```bash
+npm test -- -t "pattern"
+```
+
+### Linting
+- No standalone lint scripts are configured. CRA enforces ESLint rules during `start`/`build`.
 
 **Port Configuration**:
 - Frontend runs on port 3001 (configured in `frontend/.env`)
@@ -63,18 +82,22 @@ npm test  # Run tests
 - Models are imported and used directly in index.js
 
 **API Endpoints**:
-- `GET /allHoldings` - Fetch all user holdings
-- `GET /allPositions` - Fetch current positions
+- `GET /allHoldings` - Fetch all user holdings (scoped by JWT user)
+- `GET /allPositions` - Fetch current positions (scoped by JWT user)
 - `GET /holdings/:userId` - User-specific holdings
 - `GET /orders` - Fetch orders (sorted by date DESC)
 - `POST /newOrder` - Create buy/sell order (requires: name, qty, price, mode)
 - `POST /signup` - User registration (email + bcrypt hashed password)
 - `POST /login` - User authentication (bcrypt comparison)
+- `GET /watchlist` / `POST /watchlist` / `DELETE /watchlist/:symbol` - Manage per-user watchlist
+- `GET /verify` - Validate JWT and return user payload
+- `POST /addSamplePositions` - Seed sample positions (development only)
 
 **Data Models**:
 - **HoldingsModel**: Long-term stock holdings (name, qty, avg, price, net, day)
 - **PositionsModel**: Current trading positions (includes product type, isLoss flag)
 - **OrdersModel**: Buy/sell order history (includes mode, date)
+- **WatchlistModel**: Per-user saved symbols
 - **UserModel**: User authentication (email, hashed password)
 
 ### Frontend Architecture
@@ -120,6 +143,9 @@ npm test  # Run tests
 - POST to `http://localhost:8000/newOrder` with stock data
 - Hard-coded backend URL - change for production
 
+**API Client**:
+- Axios instance at `dashboard/src/utils/axios.js` sets `baseURL` to `http://localhost:8000` and injects `Authorization: Bearer <token>` via interceptors. 401 responses clear storage and redirect to `/signup`.
+
 **Charting**:
 - Uses Chart.js with react-chartjs-2
 - `DoughnutChart` visualizes watchlist distribution
@@ -133,7 +159,7 @@ npm test  # Run tests
 - JWT tokens generated on login/signup (24h expiry)
 - Authentication middleware at `backend/middleware/auth.js`
 - Protected routes require `Authorization: Bearer <token>` header
-- All sensitive routes are protected (holdings, positions, orders, newOrder)
+- All sensitive routes are protected (holdings, positions, orders, newOrder, watchlist)
 
 **Frontend/Dashboard**:
 - JWT tokens stored in localStorage after login/signup
@@ -155,7 +181,7 @@ npm test  # Run tests
 - Backend must run before frontend/dashboard for API calls to work
 - MongoDB must be running and accessible via MONGODB_URL
 - **Authentication is now enforced**: All protected routes require valid JWT token
-- JWT_SECRET must be set in backend/.env
+- JWT_SECRET must be set in `backend/.env`
 - Passport.js is installed but not actively used (JWT handles authentication)
 - Stock data in dashboard is static (from `data/data.js`) - real-time integration pending
 - Tokens expire after 24 hours - users must re-login
