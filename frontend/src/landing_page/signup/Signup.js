@@ -4,9 +4,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../components/Toast";
 
-// Environment variables for API URLs
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL || 'http://localhost:3000';
+// Environment variables for API URLs (with production fallbacks)
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://finovate-uh8i.onrender.com'
+    : 'http://localhost:8000');
+
+const DASHBOARD_URL =
+  process.env.REACT_APP_DASHBOARD_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://finovate-dashboard.vercel.app'
+    : 'http://localhost:3000');
 
 // Debug logging
 console.log('Environment Check:');

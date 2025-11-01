@@ -2,8 +2,12 @@ import axios from "axios";
 
 // Create axios instance
 const api = axios.create({
-  // Use environment variable in production; fallback to localhost for local dev
-  baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:8000",
+  // Use environment variable, else production fallback (Render), else localhost for dev
+  baseURL:
+    process.env.REACT_APP_BACKEND_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://finovate-uh8i.onrender.com'
+      : 'http://localhost:8000'),
 });
 
 // Add request interceptor to attach JWT token

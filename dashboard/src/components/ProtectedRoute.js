@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import api from "../utils/axios";
 
-const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3001';
+const FRONTEND_URL =
+  process.env.REACT_APP_FRONTEND_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://finovate-one.vercel.app'
+    : 'http://localhost:3001');
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
