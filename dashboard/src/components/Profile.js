@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 const Profile = () => {
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; }
   });
-  const [displayName, setDisplayName] = useState('');
+  const [displayName, setDisplayName] = useState(() => user?.displayName || user?.email?.split('@')[0] || '');
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    setDisplayName(user?.displayName || user?.email?.split('@')[0] || '');
-  }, []);
 
   const email = user?.email || 'User';
 
