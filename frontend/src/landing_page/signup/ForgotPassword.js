@@ -11,7 +11,7 @@ const BACKEND_URL =
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1=email, 2=otp+password
+  // const [step, setStep] = useState(1); // 1=email, 2=otp+password
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
@@ -23,21 +23,28 @@ export default function ForgotPassword() {
   const close = () => setToast(null);
 
   const sendOtp = () => {
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email", "error");
+    if (!email || !/^\S+@\S+\.\S+$/.test(email))
+      return show("Enter a valid email", "error");
     // Immediately navigate to reset page; fire-and-forget OTP request
     navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-    axios
-      .post(`${BACKEND_URL}/forgot-password`, { email })
-      .catch(() => {/* ignore here; user can resend OTP on reset page */});
+    axios.post(`${BACKEND_URL}/forgot-password`, { email }).catch(() => {
+      /* ignore here; user can resend OTP on reset page */
+    });
   };
 
   const resetPassword = async () => {
-    if (!/^\d{4,8}$/.test(otp)) return show("Enter the OTP sent to your email", "error");
-    if (!password || password.length < 6) return show("Password must be at least 6 characters", "error");
+    if (!/^\d{4,8}$/.test(otp))
+      return show("Enter the OTP sent to your email", "error");
+    if (!password || password.length < 6)
+      return show("Password must be at least 6 characters", "error");
     if (password !== confirm) return show("Passwords do not match", "error");
     setLoading(true);
     try {
-      await axios.post(`${BACKEND_URL}/reset-password`, { email, otp, password });
+      await axios.post(`${BACKEND_URL}/reset-password`, {
+        email,
+        otp,
+        password,
+      });
       show("Password updated. You can now sign in.", "success");
       setTimeout(() => (window.location.href = "/signup"), 900);
     } catch (e) {
@@ -50,10 +57,14 @@ export default function ForgotPassword() {
 
   return (
     <div className="container mb-5" style={{ maxWidth: 720 }}>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={close} />}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={close} />
+      )}
       <div className="row text-center py-4">
         <h1 className="display-6">Forgot password</h1>
-        <p className="text-muted">Receive a one-time code on email and set a new password.</p>
+        <p className="text-muted">
+          Receive a one-time code on email and set a new password.
+        </p>
       </div>
 
       <div className="card shadow-sm">
@@ -71,10 +82,16 @@ export default function ForgotPassword() {
                 />
                 <label htmlFor="fp_email">Email address</label>
               </div>
-              <button className="btn btn-primary" disabled={loading} onClick={sendOtp}>
+              <button
+                className="btn btn-primary"
+                disabled={loading}
+                onClick={sendOtp}
+              >
                 {loading ? "Sending…" : "Send OTP"}
               </button>
-              <a href="/signup" className="btn btn-link ms-2">Back to sign in</a>
+              <a href="/signup" className="btn btn-link ms-2">
+                Back to sign in
+              </a>
             </>
           ) : (
             <>
@@ -88,7 +105,9 @@ export default function ForgotPassword() {
                   id="fp_otp"
                   placeholder="123456"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  onChange={(e) =>
+                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))
+                  }
                 />
                 <label htmlFor="fp_otp">Enter OTP</label>
               </div>
@@ -114,10 +133,16 @@ export default function ForgotPassword() {
                 />
                 <label htmlFor="fp_pwd2">Confirm new password</label>
               </div>
-              <button className="btn btn-primary" disabled={loading} onClick={resetPassword}>
+              <button
+                className="btn btn-primary"
+                disabled={loading}
+                onClick={resetPassword}
+              >
                 {loading ? "Updating…" : "Set new password"}
               </button>
-              <a href="/signup" className="btn btn-link ms-2">Use a different email</a>
+              <a href="/signup" className="btn btn-link ms-2">
+                Use a different email
+              </a>
             </>
           )}
         </div>
