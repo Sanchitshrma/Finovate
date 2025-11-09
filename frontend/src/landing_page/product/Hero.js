@@ -9,9 +9,9 @@ function Hero() {
         </h3>
         <p className="mt-3 mb-5">
           Check out our
-          <a href="/" className="mx-1" style={{ textDecoration: "none" }}>
+          <a href="/product" className="mx-1" style={{ textDecoration: "none" }}>
             investment offerings
-            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
         </p>
       </div>

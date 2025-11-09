@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../../components/Buttons.css";
 
 function Hero() {
@@ -15,9 +16,9 @@ function Hero() {
           </p>
         </div>
         <div className="col-12 d-flex justify-content-center">
-          <button className="btn btn-lg rounded-pill signup-cta mb-5">
+          <Link to="/signup" className="btn btn-lg rounded-pill signup-cta mb-5" aria-label="Sign up for free">
             Sign up for free
-          </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -251,6 +251,93 @@ app.delete("/watchlist/:symbol", authenticateToken, async (req, res) => {
   }
 });
 
+// AI Insights proxy (Gemini)
+app.post('/ai/insights', authenticateToken, async (req, res) => {
+  // Helper to always produce HTML from markdown, even if 'marked' fails
+  const mdToHtml = async (md = '') => {
+    try {
+      const { marked } = await import('marked');
+      return marked.parse(md || '');
+    } catch {
+      // Minimal fallback: paragraphs + bold
+      const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const p = esc(md).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return `<div>${p.split(/\n\n+/).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('')}</div>`;
+    }
+  };
+
+  try {
+    const { symbol, history = [], extraContext = '', models = [], apiKey } = req.body || {};
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || apiKey;
+    if (!GEMINI_KEY) {
+      const html = await mdToHtml('Gemini API key not configured on server');
+      return res.status(500).json({ message: 'Gemini API key not configured on server', html, text: 'Gemini API key not configured on server' });
+    }
+
+    // Prepare history and simple stats
+    const hist = (history || []).map(p => ({ date: new Date(p.date), close: Number(p.close) }))
+      .filter(p => !Number.isNaN(p.close))
+      .sort((a,b) => a.date - b.date);
+    const first = hist[0]?.close ?? 0;
+    const last = hist[hist.length-1]?.close ?? 0;
+    const cagr = (first>0 && last>0) ? Math.pow(last/first, 1/5)-1 : 0;
+    let peak = first || 0; let maxDrawdown=0;
+    for (const p of hist) { peak = Math.max(peak, p.close); const dd = (p.close-peak)/peak; if (dd<maxDrawdown) maxDrawdown=dd; }
+
+    const prompt = `Create a professional research brief (~500–700 words) for the stock below with clear section headings in markdown. Sections to include:\n1) Overview (business, listing exchange)\n2) 5-year performance (CAGR, annualized volatility, max drawdown)\n3) Trend & key levels (recent momentum, support/resistance, notable inflection dates)\n4) Risks & what to watch\n5) Catalysts (near-term and medium-term)\n6) Outlook scenarios (bull / base / bear) with important levels\n7) Concise closing summary with actionable watchpoints.\n\nCRITICAL FORMAT & LOCALE RULES:\n- Assume Indian markets (NSE/BSE) and use Indian Rupee only.\n- Currency must be INR with the rupee symbol (₹) everywhere.\n- Do NOT use the $ symbol or USD unless explicitly stated; convert to ₹ if any figures are mentioned.\n- Indian numbering (lakh/crore) is acceptable when it improves readability.\n- If data is unknown, state it explicitly; do not fabricate.\n\nSymbol: ${symbol}\nCAGR: ${(cagr*100).toFixed(2)}%  MaxDD: ${(maxDrawdown*100).toFixed(2)}%\nHistory (date, close):\n${hist.slice(-750).map(p=>`${p.date.toISOString().slice(0,10)}, ${p.close}`).join('\n')}\n${extraContext ? `\nExtra context: ${extraContext}` : ''}`;
+
+    // Try @google/genai layout first
+    try {
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+      const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt });
+      let markdownText = '';
+      try {
+        if (typeof response.text === 'function') {
+          markdownText = await response.text();
+        } else {
+          markdownText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+      } catch {
+        markdownText = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      }
+      const html = await mdToHtml(markdownText || '');
+      return res.json({ text: markdownText, html });
+    } catch (sdkErr) {
+      // Fallback to REST with model fallbacks
+      const MODELS = Array.isArray(models) && models.length > 0 ? models : [
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-001',
+        'gemini-1.5-pro',
+        'gemini-pro',
+      ];
+      const body = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+      let lastErr = '';
+      for (const model of MODELS) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`;
+        const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (r.ok) {
+          const data = await r.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const html = await mdToHtml(text || '');
+          return res.json({ text, html });
+        }
+        lastErr = await r.text().catch(()=> '');
+        if (![400,404,501].includes(r.status)) {
+          const html = await mdToHtml(lastErr || 'Gemini error');
+          return res.status(r.status).json({ message: lastErr || 'Gemini error', html, text: lastErr || 'Gemini error' });
+        }
+      }
+      const html = await mdToHtml(`No supported Gemini model responded. Last: ${lastErr}`);
+      return res.status(502).json({ message: `No supported Gemini model responded. Last: ${lastErr}`, html, text: `No supported Gemini model responded. Last: ${lastErr}` });
+    }
+  } catch (e) {
+    console.error('AI insights proxy failed:', e);
+    res.status(500).json({ message: 'AI insights failed', html: '<p>AI insights failed.</p>', text: 'AI insights failed.' });
+  }
+});
+
 app.get("/allHoldings", authenticateToken, async (req, res) => {
   try {
     // Get holdings for the authenticated user

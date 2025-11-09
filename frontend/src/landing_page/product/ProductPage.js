@@ -5,6 +5,9 @@ import RightSection from "./RightSection";
 import Universe from "./Universe";
 
 function ProductPage() {
+  const DASHBOARD_URL =
+    process.env.REACT_APP_DASHBOARD_URL ||
+    (process.env.NODE_ENV === 'production' ? 'https://finovate-dashboard.vercel.app' : 'http://localhost:3000');
   return (
     <>
       <Hero />
@@ -12,8 +15,8 @@ function ProductPage() {
         imageUrl="media/images/kite.png"
         productName="FinX"
         productDescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the FinX experience seamlessly on your Android and iOS devices."
-        tryDemo=""
-        leranMore=""
+        tryDemo={DASHBOARD_URL}
+        leranMore="/product"
         googlePlay=""
         appStore=""
       />
@@ -22,7 +25,7 @@ function ProductPage() {
         productName="Console"
         productDescription="The central dashboard for your Finovate account. Gain insights into your trades and investments with in-depth reports and visualisations."
         tryDemo="Learn More"
-        tryDemoLink=""
+        tryDemoLink="/product"
       />
       <LeftSection
         imageUrl="media/images/coin.png"
@@ -38,7 +41,7 @@ function ProductPage() {
         productName="Kite Connect API"
         productDescription="Build powerful trading platforms and experiences with our super simple HTTP/JSON APIs. If you are a startup, build your investment app and showcase it to our clientbase."
         tryDemo="Kite Connect"
-        tryDemoLink=""
+        tryDemoLink="/support"
       />
       <LeftSection
         imageUrl="media/images/varsity.png"
@@ -51,7 +54,7 @@ function ProductPage() {
       />
       <p className="text-center fs-5">
         Want to know more about our technology stack? Check out the{" "}
-        <a href="/" style={{ textDecoration: "none" }}>
+        <a href="/product" style={{ textDecoration: "none" }}>
           Finovate.tech{" "}
         </a>
         blog.

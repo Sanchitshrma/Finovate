@@ -13,7 +13,7 @@ function CreateTicket() {
           </h5>
           <a
             className="d-block py-2"
-            href="/"
+href="/support"
             style={{ textDecoration: "none" }}
           >
             Getting started

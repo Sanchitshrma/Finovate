@@ -1,5 +1,8 @@
 import React from "react";
 function Stats() {
+  const DASHBOARD_URL =
+    process.env.REACT_APP_DASHBOARD_URL ||
+    (process.env.NODE_ENV === 'production' ? 'https://finovate-dashboard.vercel.app' : 'http://localhost:3000');
   return (
     <div className="container py-4">
       <div className="row g-4 align-items-center">
@@ -31,10 +34,10 @@ function Stats() {
         <div className="col-12 col-lg-6 p-3 p-md-4">
           <img src="media/images/ecosystem.png" alt="ecosystem" className="img-fluid" />
           <div className="text-center mt-3">
-            <a href="/" className="mx-3" style={{ textDecoration: "none" }}>
+            <a href="/product" className="mx-3" style={{ textDecoration: "none" }}>
               Explore our products<i className="fa-solid fa-arrow-right"></i>
             </a>
-            <a href="/" style={{ textDecoration: "none" }}>
+            <a href={DASHBOARD_URL} style={{ textDecoration: "none" }}>
               Try Kite demo<i className="fa-solid fa-arrow-right"></i>
             </a>
           </div>

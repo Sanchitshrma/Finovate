@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../components/Buttons.css";
 
 function OpenAccount() {
@@ -11,9 +12,9 @@ function OpenAccount() {
           F&O trades.
         </p>
         <div className="d-flex justify-content-center mt-3">
-          <button className="btn btn-lg rounded-pill signup-cta">
+          <Link to="/signup" className="btn btn-lg rounded-pill signup-cta" aria-label="Sign up for free">
             Sign up for free
-          </button>
+          </Link>
         </div>
       </div>
     </div>

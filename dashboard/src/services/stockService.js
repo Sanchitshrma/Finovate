@@ -160,6 +160,101 @@ export const clearPriceCache = () => {
 };
 
 /**
+ * Get historical daily adjusted prices for up to the last `years` years.
+ * Uses Alpha Vantage when configured; otherwise generates a simulated series.
+ */
+export const getHistoricalDaily = async (symbol, years = 5) => {
+  const end = new Date();
+  const start = new Date();
+  // Support fractional years by converting to months
+  const months = Math.max(1, Math.round((years || 5) * 12));
+  start.setMonth(end.getMonth() - months);
+
+  // Try provider-specific historical first so it matches watchlist provider
+  // Alpha Vantage (daily adjusted)
+  if (API_PROVIDER === 'alpha_vantage' && ALPHA_VANTAGE_KEY && ALPHA_VANTAGE_KEY !== 'demo') {
+    try {
+      const apiSymbol = `${symbol}.BSE`;
+      const response = await axios.get('https://www.alphavantage.co/query', {
+        params: {
+          function: 'TIME_SERIES_DAILY_ADJUSTED',
+          symbol: apiSymbol,
+          outputsize: 'full',
+          apikey: ALPHA_VANTAGE_KEY,
+        },
+      });
+      const series = response.data['Time Series (Daily)'] || {};
+      const rows = Object.entries(series)
+        .map(([date, o]) => ({ date: new Date(date), close: parseFloat(o['5. adjusted close']) }))
+        .filter(({ date }) => date >= start && date <= end)
+        .sort((a, b) => a.date - b.date);
+
+      if (rows.length > 0) {
+        // Anchor last point to current price if available
+        const latest = await getStockPrice(symbol, rows[rows.length - 1].close);
+        if (latest?.price && Math.abs(latest.price - rows[rows.length - 1].close) / rows[rows.length - 1].close > 0.01) {
+          rows.push({ date: new Date(), close: parseFloat(latest.price) });
+        }
+        return rows;
+      }
+    } catch (e) {
+      console.error('Failed to fetch historical from Alpha Vantage:', e);
+    }
+  }
+
+  // Finnhub daily candles (NSE suffix .NS)
+  if (API_PROVIDER === 'finnhub' && FINNHUB_KEY) {
+    try {
+      const from = Math.floor(start.getTime() / 1000);
+      const to = Math.floor(end.getTime() / 1000);
+      const apiSymbol = `${symbol}.NS`;
+      const { data } = await axios.get('https://finnhub.io/api/v1/stock/candle', {
+        params: { symbol: apiSymbol, resolution: 'D', from, to, token: FINNHUB_KEY },
+      });
+      if (data && data.s === 'ok' && Array.isArray(data.c) && Array.isArray(data.t)) {
+        const rows = data.t.map((ts, i) => ({ date: new Date(ts * 1000), close: parseFloat(data.c[i]) }))
+          .filter(({ date }) => date >= start && date <= end)
+          .sort((a,b) => a.date - b.date);
+        if (rows.length > 0) {
+          // Anchor to latest real-time price
+          const latest = await getStockPrice(symbol, rows[rows.length - 1].close);
+          if (latest?.price && Math.abs(latest.price - rows[rows.length - 1].close) / rows[rows.length - 1].close > 0.01) {
+            rows.push({ date: new Date(), close: parseFloat(latest.price) });
+          }
+          return rows;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch historical from Finnhub:', e);
+    }
+  }
+
+  // Fallback: generate a realistic random walk around a base price
+  const base = 100 + Math.random() * 200;
+  const days = years * 252; // trading days
+  const rows = [];
+  let price = base;
+  const date = new Date(start);
+  while (date <= end) {
+    // Skip weekends to simulate markets
+    if (date.getDay() !== 0 && date.getDay() !== 6) {
+      const drift = 0.0002; // small average up drift
+      const vol = 0.015; // daily vol ~1.5%
+      const rnd = (Math.random() - 0.5) * 2; // [-1, 1]
+      price = price * (1 + drift + vol * rnd);
+      rows.push({ date: new Date(date), close: parseFloat(price.toFixed(2)) });
+    }
+    date.setDate(date.getDate() + 1);
+  }
+  // Anchor fallback to current if available
+  try {
+    const latest = await getStockPrice(symbol, rows[rows.length - 1]?.close || base);
+    if (latest?.price) rows.push({ date: new Date(), close: parseFloat(latest.price) });
+  } catch {}
+  return rows.slice(-days);
+};
+
+/**
  * Calculate profit/loss percentage
  */
 export const calculateProfitLoss = (avgPrice, currentPrice) => {

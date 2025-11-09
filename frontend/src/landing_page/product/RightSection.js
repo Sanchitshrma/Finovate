@@ -15,10 +15,12 @@ function RightSection({
             {productDescription}
           </p>
           <div>
-            <a href={tryDemoLink} className="text-decoration-none">
-              {tryDemo}
-              <i className="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
-            </a>
+            {tryDemoLink && (
+              <a href={tryDemoLink} className="text-decoration-none">
+                {tryDemo}
+                <i className="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
+              </a>
+            )}
           </div>
         </div>
         <div className="col-12 col-lg-6 order-1 order-lg-2">

@@ -17,10 +17,13 @@ cd backend
 npm install
 npm start  # nodemon on port 8000
 ```
-Environment: create `backend/.env` with
+Create `backend/.env` with at minimum:
 ```
 MONGODB_URL=your_mongo_connection_string
 JWT_SECRET=your_jwt_secret_key
+# Optional (only for AI insights route):
+# GEMINI_API_KEY=your_google_gemini_key
+# or GOOGLE_GEMINI_API_KEY=your_google_gemini_key
 ```
 > No backend test or lint scripts are defined.
 
@@ -40,6 +43,10 @@ npm install
 npm start   # port 3000
 npm run build
 npm test    # CRA/Jest watch mode
+```
+Override the dashboard API target if needed (e.g. pointing to a different backend):
+```bash
+REACT_APP_BACKEND_URL=http://localhost:8000 npm start
 ```
 
 ### Testing (CRA projects)
@@ -74,7 +81,7 @@ Entry: `backend/index.js`
 - MongoDB connects at startup using `MONGODB_URL`
 - Bcrypt for password hashing (8 rounds), JWT for auth (24h expiry)
 
-Data layer pattern
+Data layer
 - Schemas (`backend/schemas/`): structure-only Mongoose schemas
 - Models (`backend/models/`): Mongoose models wrapping schemas, imported directly in `index.js`
 
@@ -83,21 +90,27 @@ Key endpoints
 - Trading data: `GET /allHoldings`, `GET /allPositions`, `GET /holdings/:userId`, `GET /orders`
 - Orders: `POST /newOrder` (BUY/SELL; updates holdings accordingly)
 - Watchlist: `GET /watchlist`, `POST /watchlist`, `DELETE /watchlist/:symbol`
+  - Data constraint: watchlist enforces uniqueness per user (`{ userId, symbol }` compound index)
 - Dev seed: `POST /addSamplePositions` (authenticated)
+- AI insights proxy: `POST /ai/insights` (authenticated)
+  - Requires a Gemini API key via `GEMINI_API_KEY`/`GOOGLE_GEMINI_API_KEY` in env, or `apiKey` in the request body
+  - Returns generated markdown text and rendered HTML for stock research briefs
 
-Models
-- HoldingsModel, PositionsModel, OrdersModel, WatchlistModel, UserModel
+Order/holdings behavior
+- BUY: creates/updates holding; average price recomputed when adding to an existing position
+- SELL: decrements quantity; deletes holding when quantity reaches 0
 
 ### Frontend
 
 Entry: `frontend/src/index.js`
 - React Router for navigation with persistent `Navbar` and `Footer`
 - Routes: `/`, `/signup`, `/about`, `/product`, `/pricing`, `/support`
+- Signup/login persist JWT and user in `localStorage` and redirect to the dashboard app
 
 ### Dashboard
 
 Entry: `dashboard/src/index.js` → `components/Home.js`
-- All routes are wrapped in `ProtectedRoute` to require a valid JWT in localStorage
+- All routes are wrapped in `ProtectedRoute` to require a valid JWT in `localStorage`
 - Layout: `TopBar` + main `Dashboard`
 
 API client
@@ -107,14 +120,13 @@ API client
   - Response interceptor clears storage and redirects to `/signup` on 401
 
 Data/UI
-- Static seed data for lists/charts in `dashboard/src/data/data.js`
 - Charting via `chart.js` + `react-chartjs-2`
 
 ## Authentication & Authorization
 
 - Middleware: `backend/middleware/auth.js` (`authenticateToken`) guards protected routes
 - Tokens stored in frontend/dashboard `localStorage`
-- Protected routes: holdings, positions, orders, newOrder, watchlist, addSamplePositions
+- Protected routes: holdings, positions, orders, newOrder, watchlist, addSamplePositions, ai/insights
 - Token expiry: 24h
 - See `AUTHENTICATION.md` for request/response examples and troubleshooting
 
@@ -128,6 +140,6 @@ Data/UI
 ## Notes
 
 - Start backend before frontend/dashboard
-- Ensure MongoDB is reachable via `MONGODB_URL`
+- Ensure MongoDB is reachable via `MONGODB_URL` (note: older docs may refer to `MONGO_URI` — this project uses `MONGODB_URL`)
 - Tokens must be present for protected API calls
-- Stock data in dashboard is static (real-time integration pending)
+- Dashboard stock lists/charts are seeded/static; real-time integration is pending

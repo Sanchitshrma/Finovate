@@ -20,20 +20,28 @@ function LeftSection({
             {productDescription}
           </p>
           <div className="d-flex flex-wrap gap-4">
-            <a href={tryDemo} className="text-decoration-none">
-              Try demo <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </a>
-            <a href={leranMore} className="text-decoration-none">
-              Learn more <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </a>
+            {tryDemo && (
+              <a href={tryDemo} className="text-decoration-none">
+                Try demo <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+            )}
+            {leranMore && (
+              <a href={leranMore} className="text-decoration-none">
+                Learn more <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+            )}
           </div>
           <div className="mt-3 d-flex gap-3 flex-wrap">
-            <a href={googlePlay}>
-              <img src="media/images/googlePlayBadge.svg" alt="googlePlay" className="img-fluid" />
-            </a>
-            <a href={appStore}>
-              <img src="media/images/appStoreBadge.svg" alt="appStore" className="img-fluid" />
-            </a>
+            {googlePlay && (
+              <a href={googlePlay}>
+                <img src="media/images/googlePlayBadge.svg" alt="googlePlay" className="img-fluid" />
+              </a>
+            )}
+            {appStore && (
+              <a href={appStore}>
+                <img src="media/images/appStoreBadge.svg" alt="appStore" className="img-fluid" />
+              </a>
+            )}
           </div>
         </div>
       </div>

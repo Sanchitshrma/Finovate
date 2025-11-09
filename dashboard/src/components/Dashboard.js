@@ -11,6 +11,7 @@ import Summary from "./Summary";
 import WatchList from "./WatchList";
 import Profile from "./Profile";
 import Settings from "./Settings";
+import StockInsights from "./StockInsights";
 import { GeneralContextProvider } from "./GeneralContext";
 
 const Dashboard = () => {
@@ -27,6 +28,7 @@ const Dashboard = () => {
           <Route path="/positions" element={<Positions />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/apps" element={<Apps />} />
+          <Route path="/ai" element={<StockInsights />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

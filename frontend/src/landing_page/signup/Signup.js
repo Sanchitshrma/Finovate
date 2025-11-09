@@ -358,7 +358,7 @@ function Signup() {
                   By proceeding, you agree to the Finovate{" "}
                   <a
                     className=""
-                    href="/"
+                    href="/support"
                     style={{ textDecoration: "none", lineHeight: "2.5" }}
                   >
                     terms
@@ -366,7 +366,7 @@ function Signup() {
                   &{" "}
                   <a
                     className=""
-                    href="/"
+                    href="/support"
                     style={{ textDecoration: "none", lineHeight: "2.5" }}
                   >
                     privacy policy

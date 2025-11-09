@@ -24,9 +24,9 @@ function Team() {
             Connect on
             <a href="/" style={{ textDecoration: "none" }} className="ms-1">Homepage</a>
             /
-            <a href="/" style={{ textDecoration: "none" }} className="mx-1">TradingQnA</a>
+            <a href="/support" style={{ textDecoration: "none" }} className="mx-1">TradingQnA</a>
             /
-            <a href="/" style={{ textDecoration: "none" }} className="ms-1">Twitter</a>
+            <a href="https://twitter.com" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }} className="ms-1">Twitter</a>
           </p>
         </div>
       </div>

@@ -46,13 +46,22 @@ const Menu = () => {
           </li>
           <li>
             <NavLink style={{ textDecoration: "none" }} to="/apps">
-              {({ isActive }) => <p className={getClass({ isActive })}>Apps</p>}
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Apps</p>
+              )}
             </NavLink>
           </li>
-        </ul>
+          <li>
+            <NavLink style={{ textDecoration: "none" }} to="/ai">
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>AI Insights</p>
+              )}
+            </NavLink>
+          </li>
+          </ul>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default Menu;
+  export default Menu;

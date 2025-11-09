@@ -32,7 +32,7 @@ function Hero() {
             community initiatives to empower retail traders and investors.
           </p>
           <p>
-            <a href="/" style={{ textDecoration: "none" }}>
+            <a href="/about" style={{ textDecoration: "none" }}>
               Rainmatter
             </a>
             , our fintech fund and incubator, has invested in several fintech
