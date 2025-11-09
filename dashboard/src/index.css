@@ -340,6 +340,17 @@ hr {
   transform: rotate(-45deg);
 }
 
+/* Theme */
+body.theme-dark { background: #0f172a; color: #e5e7eb; }
+body.theme-dark .panel { background: #111827; color: #e5e7eb; }
+body.theme-dark .menu { color: #cbd5e1; }
+body.theme-dark .menu.selected { color: #93c5fd; }
+body.theme-dark .content { background: #0f172a; }
+body.theme-dark .order-table table, body.theme-dark .card-item { background: #0b1220; color: #e5e7eb; }
+body.theme-dark .add-stock-button, body.theme-dark .add-first-stock { background: #4f46e5; }
+body.theme-dark .user-menu-dropdown { background: #0b1220; }
+body.theme-dark .user-menu-list li:hover { background: #0f172a; }
+
 /* Responsive layout adjustments */
 
 /* Responsive tables for orders/holdings/positions */
@@ -357,7 +368,18 @@ hr {
     font-size: 0.8rem;
     padding: 10px 8px;
   }
+  /* Show cards, hide tables on small screens */
+  .order-table { display: none; }
+  .responsive-cards { display: grid; gap: 12px; }
 }
+
+/* Card styles */
+.responsive-cards { display: none; }
+.card-item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #fff; }
+.card-header { font-weight: 600; margin-bottom: 8px; color: #111827; }
+.card-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; }
+.card-row .label { color: #6b7280; }
+.card-row .value { color: #111827; }
 @media (max-width: 992px) {
   .dashboard-container {
     flex-direction: column;
@@ -1097,15 +1119,19 @@ hr {
     display: inline-flex;
   }
 
-  .menu-mobile {
-    display: none;
+.menu-mobile {
+    display: block;
     width: 100%;
     border-top: 1px solid #eee;
     background: #fff;
-    padding: 8px 0;
+    overflow: hidden;
+    max-height: 0;
+    padding: 0;
+    transition: max-height 0.25s ease, padding 0.25s ease;
   }
   .menu-mobile.open {
-    display: block;
+    max-height: 420px;
+    padding: 8px 0;
   }
   .menu-mobile .menu-container {
     display: block;

@@ -1,85 +1,53 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 const Menu = () => {
-  const [selectedMenu, setSelectedMenu] = useState(0);
+  const getClass = ({ isActive }) => (isActive ? "menu selected" : "menu");
 
-  const handleMenuClick = (index) => {
-    setSelectedMenu(index);
-  };
-
-  const menuClass = "menu";
-  const activeMenuClass = "menu selected";
   return (
     <div className="menu-container">
-      <img src="logo.png" alt="Finovate logo" style={{ width: "50px" }} />
+      <img src="logo2.png" alt="Finovate logo" style={{ width: "50px" }} />
       <div className="menus">
         <ul>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/"
-              onClick={() => handleMenuClick(0)}
-            >
-              <p className={selectedMenu === 0 ? activeMenuClass : menuClass}>
-                Dashboard
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/" end>
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Dashboard</p>
+              )}
+            </NavLink>
           </li>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/orders"
-              onClick={() => handleMenuClick(1)}
-            >
-              <p className={selectedMenu === 1 ? activeMenuClass : menuClass}>
-                Orders
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/orders">
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Orders</p>
+              )}
+            </NavLink>
           </li>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/holdings"
-              onClick={() => handleMenuClick(2)}
-            >
-              <p className={selectedMenu === 2 ? activeMenuClass : menuClass}>
-                Holdings
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/holdings">
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Holdings</p>
+              )}
+            </NavLink>
           </li>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/positions"
-              onClick={() => handleMenuClick(3)}
-            >
-              <p className={selectedMenu === 3 ? activeMenuClass : menuClass}>
-                Positions
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/positions">
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Positions</p>
+              )}
+            </NavLink>
           </li>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/funds"
-              onClick={() => handleMenuClick(4)}
-            >
-              <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>
-                Funds
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/funds">
+              {({ isActive }) => (
+                <p className={getClass({ isActive })}>Funds</p>
+              )}
+            </NavLink>
           </li>
           <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/apps"
-              onClick={() => handleMenuClick(5)}
-            >
-              <p className={selectedMenu === 5 ? activeMenuClass : menuClass}>
-                Apps
-              </p>
-            </Link>
+            <NavLink style={{ textDecoration: "none" }} to="/apps">
+              {({ isActive }) => <p className={getClass({ isActive })}>Apps</p>}
+            </NavLink>
           </li>
         </ul>
       </div>

@@ -59,6 +59,7 @@ const TopBar = () => {
         className="topbar-hamburger"
         aria-label="Toggle menu"
         aria-expanded={menuOpen}
+        aria-controls="mobileMenu"
         onClick={() => setMenuOpen((v) => !v)}
       >
         <span className={menuOpen ? "hamburger open" : "hamburger"} />
@@ -67,7 +68,7 @@ const TopBar = () => {
       <UserMenu />
 
       {/* Collapsible mobile menu */}
-      <div className={`menu-mobile ${menuOpen ? 'open' : ''}`}>
+      <div id="mobileMenu" className={`menu-mobile ${menuOpen ? 'open' : ''}`} role="navigation">
         <Menu />
       </div>
     </div>

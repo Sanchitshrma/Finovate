@@ -144,6 +144,9 @@
 .user-menu-list li:hover {
   background-color: #f3f4f6;
 }
+.user-menu-list li.active {
+  background-color: #eef2ff;
+}
 
 .user-menu-list li svg {
   color: #666;

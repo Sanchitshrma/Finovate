@@ -29,30 +29,45 @@ const Orders = () => {
           </Link>
         </div>
       ) : (
-        <div className="order-table">
-          <div className="title">Orders ({orders.length})</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Quantity</th>
-                <th>Price (₹)</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order, index) => (
-                <tr key={index}>
-                  <td>{order.name}</td>
-                  <td>{order.mode}</td>
-                  <td>{order.qty}</td>
-                  <td>{order.price}</td>
-                  <td>{new Date(order.date).toLocaleString()}</td>
+        <div>
+          <div className="order-table">
+            <div className="title">Orders ({orders.length})</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>Price (₹)</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {orders.map((order, index) => (
+                  <tr key={index}>
+                    <td>{order.name}</td>
+                    <td>{order.mode}</td>
+                    <td>{order.qty}</td>
+                    <td>{order.price}</td>
+                    <td>{new Date(order.date).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="responsive-cards" aria-label="Orders list">
+            {orders.map((order, index) => (
+              <div key={index} className="card-item">
+                <div className="card-row"><span className="label">Name</span><span className="value">{order.name}</span></div>
+                <div className="card-row"><span className="label">Type</span><span className="value">{order.mode}</span></div>
+                <div className="card-row"><span className="label">Quantity</span><span className="value">{order.qty}</span></div>
+                <div className="card-row"><span className="label">Price</span><span className="value">₹{order.price}</span></div>
+                <div className="card-row"><span className="label">Date</span><span className="value">{new Date(order.date).toLocaleString()}</span></div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

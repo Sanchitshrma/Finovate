@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/axios";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const FRONTEND_URL =
   process.env.REACT_APP_FRONTEND_URL ||
@@ -66,10 +67,12 @@ const ProtectedRoute = ({ children }) => {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        fontSize: "18px",
+        flexDirection: 'column',
+        gap: '12px',
         color: "#666"
-      }}>
-        Verifying authentication...
+      }} aria-live="polite">
+        <CircularProgress color="primary" />
+        <div>Loading your dashboard…</div>
       </div>
     );
   }

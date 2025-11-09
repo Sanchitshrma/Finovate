@@ -10,8 +10,8 @@ function ProductPage() {
       <Hero />
       <LeftSection
         imageUrl="media/images/kite.png"
-        productName="Kite"
-        productDescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the Kite experience seamlessly on your Android and iOS devices."
+        productName="FinX"
+        productDescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the FinX experience seamlessly on your Android and iOS devices."
         tryDemo=""
         leranMore=""
         googlePlay=""
@@ -20,7 +20,7 @@ function ProductPage() {
       <RightSection
         imageUrl="media/images/console.png"
         productName="Console"
-        productDescription="The central dashboard for your Zerodha account. Gain insights into your trades and investments with in-depth reports and visualisations."
+        productDescription="The central dashboard for your Finovate account. Gain insights into your trades and investments with in-depth reports and visualisations."
         tryDemo="Learn More"
         tryDemoLink=""
       />

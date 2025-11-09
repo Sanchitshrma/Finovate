@@ -134,6 +134,28 @@ const Holdings = () => {
         </table>
       </div>
 
+      {/* Mobile cards */}
+      <div className="responsive-cards" aria-label="Holdings list">
+        {allHoldings.map((stock, index) => {
+          const curValue = stock.price * stock.qty;
+          const isProfit = curValue - stock.avg * stock.qty >= 0.0;
+          const profClass = isProfit ? "profit" : "loss";
+          const dayClass = stock.isLoss ? "loss" : "profit";
+          return (
+            <div key={index} className="card-item">
+              <div className="card-header">{stock.name}</div>
+              <div className="card-row"><span className="label">Qty</span><span className="value">{stock.qty}</span></div>
+              <div className="card-row"><span className="label">Avg</span><span className="value">₹{stock.avg.toFixed(2)}</span></div>
+              <div className="card-row"><span className="label">LTP</span><span className="value">₹{stock.price.toFixed(2)}</span></div>
+              <div className="card-row"><span className="label">Cur. val</span><span className="value">₹{curValue.toFixed(2)}</span></div>
+              <div className="card-row"><span className="label">P&L</span><span className={`value ${profClass}`}>{(curValue - stock.avg * stock.qty).toFixed(2)}</span></div>
+              <div className="card-row"><span className="label">Net chg.</span><span className={`value ${profClass}`}>{stock.net}</span></div>
+              <div className="card-row"><span className="label">Day chg.</span><span className={`value ${dayClass}`}>{stock.day}</span></div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="row">
         <div className="col">
           <h5>

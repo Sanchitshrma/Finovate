@@ -16,12 +16,18 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 import { DoughnutChart } from "./DoughnutChart";
+import AnalyticsModal from "./AnalyticsModal";
+import MoreActionsModal from "./MoreActionsModal";
 
 const WatchList = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [userWatchlistSymbols, setUserWatchlistSymbols] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState({ symbol: '', data: {} });
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [moreSymbol, setMoreSymbol] = useState('');
   const refreshInterval = parseInt(process.env.REACT_APP_PRICE_REFRESH_INTERVAL || '30') * 1000;
 
   // Fetch user's watchlist from backend
@@ -190,6 +196,7 @@ const WatchList = () => {
           className="add-stock-button"
           onClick={() => setIsAddModalOpen(true)}
           title="Add stock to watchlist"
+          aria-label="Add stock to watchlist"
         >
           + Add Stock
         </button>
@@ -218,6 +225,11 @@ const WatchList = () => {
                   stock={stock} 
                   key={index} 
                   onRemove={handleRemoveStock}
+                  onAnalytics={() => {
+                    setAnalyticsData({ symbol: stock.name, data: stock });
+                    setIsAnalyticsOpen(true);
+                  }}
+                  onMore={() => { setMoreSymbol(stock.name); setIsMoreOpen(true); }}
                 />
               );
             })}
@@ -231,13 +243,27 @@ const WatchList = () => {
         onClose={() => setIsAddModalOpen(false)}
         onStockAdded={handleStockAdded}
       />
+
+      <AnalyticsModal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+        symbol={analyticsData.symbol}
+        data={analyticsData.data}
+      />
+
+      <MoreActionsModal
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
+        symbol={moreSymbol}
+        onRemove={handleRemoveStock}
+      />
     </div>
   );
 };
 
 export default WatchList;
 
-const WatchListItem = ({ stock, onRemove }) => {
+const WatchListItem = ({ stock, onRemove, onAnalytics, onMore }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
 
   const handelMouseEnter = (e) => {
@@ -278,14 +304,14 @@ const WatchListItem = ({ stock, onRemove }) => {
           >
             ×
           </button>
-          <WatchListActions uid={stock.name} />
+          <WatchListActions uid={stock.name} onAnalytics={onAnalytics} onMore={onMore} />
         </>
       )}
     </li>
   );
 };
 
-const WatchListActions = ({ uid }) => {
+const WatchListActions = ({ uid, onAnalytics, onMore }) => {
   const generalContext = useContext(GeneralContext);
 
   const handleSellClick = () => {
@@ -323,12 +349,12 @@ const WatchListActions = ({ uid }) => {
           arrow
           TransitionComponent={Grow}
         >
-          <button className="action">
+          <button className="action" onClick={onAnalytics} aria-label={`Open analytics for ${uid}`}>
             <BarChartOutlined className="icon" />
           </button>
         </Tooltip>
         <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
-          <button className="action">
+          <button className="action" onClick={onMore} aria-label={`More actions for ${uid}`}>
             <MoreHoriz className="icon" />
           </button>
         </Tooltip>

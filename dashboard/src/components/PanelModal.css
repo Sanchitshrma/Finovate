@@ -1,0 +1,25 @@
+/* Simple panel modal shared styles */
+.panel-modal {
+  background: white;
+  border-radius: 12px;
+  width: 92%;
+  max-width: 520px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.panel-close { background: none; border: none; font-size: 26px; line-height: 1; cursor: pointer; color: #6b7280; }
+.panel-body { display: flex; flex-direction: column; gap: 10px; }
+.metric-row { display: flex; justify-content: space-between; }
+.metric-row.small { font-size: 12px; color: #6b7280; }
+.metric-label { color: #6b7280; }
+.metric-value { color: #111827; font-weight: 600; }
+.metric-value.profit { color: #10b981; }
+.metric-value.loss { color: #ef4444; }
+.link-row { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.link-row a { text-decoration: none; color: #2563eb; }
+.link-row a:hover { text-decoration: underline; }
+.actions-list { display: flex; flex-direction: column; gap: 10px; }
+.panel-action { padding: 10px 12px; border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; cursor: pointer; text-align: left; }
+.panel-action:hover { background: #f9fafb; }
+.panel-action.danger { color: #dc2626; border-color: #fecaca; }
