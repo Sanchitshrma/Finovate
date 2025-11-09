@@ -11,7 +11,7 @@ const BACKEND_URL =
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  // const [step, setStep] = useState(1); // 1=email, 2=otp+password
+  const [step] = useState(1); // 1=email, 2=otp+password (setter unused)
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
