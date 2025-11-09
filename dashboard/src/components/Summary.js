@@ -33,14 +33,10 @@ const Summary = () => {
     try {
       setLoading(true);
       
-      // Fetch holdings and positions
-      const [holdingsRes, positionsRes] = await Promise.all([
-        api.get("/allHoldings"),
-        api.get("/allPositions"),
-      ]);
+      // Fetch holdings
+      const holdingsRes = await api.get("/allHoldings");
 
       const holdingsData = holdingsRes.data;
-      const positionsData = positionsRes.data;
 
       // Get real-time prices if there are holdings
       if (holdingsData.length > 0) {
