@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 
 import GeneralContext from "./GeneralContext";
 
@@ -36,8 +36,8 @@ const WatchList = () => {
     }
   };
 
-  // Fetch real-time prices for user's watchlist
-  const updatePrices = async (symbols = userWatchlistSymbols) => {
+// Fetch real-time prices for user's watchlist
+  const updatePrices = useCallback(async (symbols = userWatchlistSymbols) => {
     try {
       setLoading(true);
       
@@ -87,7 +87,7 @@ const WatchList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userWatchlistSymbols]);
 
   // Initial load of user watchlist
   useEffect(() => {
@@ -98,7 +98,7 @@ const WatchList = () => {
       }
     };
     initializeWatchlist();
-  }, []);
+  }, [updatePrices]);
 
   // Periodic price updates
   useEffect(() => {
@@ -109,7 +109,7 @@ const WatchList = () => {
     }, refreshInterval);
     
     return () => clearInterval(interval);
-  }, [userWatchlistSymbols, refreshInterval]);
+  }, [userWatchlistSymbols, refreshInterval, updatePrices]);
 
   // Handle adding stock
   const handleStockAdded = async (symbol) => {

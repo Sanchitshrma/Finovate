@@ -5,7 +5,6 @@ import { getBatchStockPrices } from "../services/stockService";
 const Summary = () => {
   const [user, setUser] = useState(null);
   const [holdings, setHoldings] = useState([]);
-  const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [portfolioData, setPortfolioData] = useState({
     totalInvestment: 0,
@@ -100,7 +99,6 @@ const Summary = () => {
         });
       }
 
-      setPositions(positionsData);
     } catch (error) {
       console.error("Failed to fetch portfolio data:", error);
     } finally {

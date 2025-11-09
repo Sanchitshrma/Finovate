@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import "./UserMenu.css";
 
 const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3001';
@@ -8,7 +7,6 @@ const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Get user from localStorage
