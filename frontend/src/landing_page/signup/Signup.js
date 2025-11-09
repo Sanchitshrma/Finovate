@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import OpenAccount from "../OpenAccount";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Toast from "../../components/Toast";
 
 // Environment variables for API URLs (with production fallbacks)
@@ -17,12 +16,6 @@ const DASHBOARD_URL =
     ? 'https://finovate-dashboard.vercel.app'
     : 'http://localhost:3000');
 
-// Debug logging
-console.log('Environment Check:');
-console.log('BACKEND_URL:', BACKEND_URL);
-console.log('DASHBOARD_URL:', DASHBOARD_URL);
-console.log('process.env.REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
-console.log('process.env.REACT_APP_DASHBOARD_URL:', process.env.REACT_APP_DASHBOARD_URL);
 function Signup() {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -34,7 +27,6 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
-  const navigate = useNavigate();
 
   const showToast = (message, type) => {
     setToast({ message, type });
