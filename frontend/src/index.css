@@ -54,6 +54,16 @@ code {
 }
 
 /* SignUp Page */
+.forgot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+.forgot-link:hover { text-decoration: underline; }
+.forgot-link:focus { outline: 2px solid rgba(37,99,235,0.4); outline-offset: 2px; border-radius: 6px; }
 
 /* .Signup {
   /* background-color: rgb(100, 100, 100);

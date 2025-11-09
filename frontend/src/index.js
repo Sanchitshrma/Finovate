@@ -4,6 +4,8 @@ import "./index.css";
 import HomePage from "./landing_page/home/HomePage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Signup from "./landing_page/signup/Signup";
+import ForgotPassword from "./landing_page/signup/ForgotPassword";
+import ResetPassword from "./landing_page/signup/ResetPassword";
 import AboutPage from "./landing_page/about/AboutPage";
 import ProductPage from "./landing_page/product/ProductPage";
 import PricingPage from "./landing_page/pricing/PricingPage";
@@ -19,6 +21,8 @@ root.render(
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/product" element={<ProductPage />} />
       <Route path="/pricing" element={<PricingPage />} />

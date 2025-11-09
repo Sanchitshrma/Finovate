@@ -187,9 +187,26 @@ function Signup() {
         <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
       {(redirecting || isSubmitting) && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.85)', zIndex: 2000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="spinner-border text-primary" role="status" aria-label="Loading" />
-          <p className="mt-3 text-muted">{redirecting ? 'Redirecting to dashboard…' : 'Processing…'}</p>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(255,255,255,0.85)",
+            zIndex: 2000,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            className="spinner-border text-primary"
+            role="status"
+            aria-label="Loading"
+          />
+          <p className="mt-3 text-muted">
+            {redirecting ? "Redirecting to dashboard…" : "Processing…"}
+          </p>
         </div>
       )}
       <div className="container  mb-5">
@@ -265,10 +282,17 @@ function Signup() {
                 style={{ paddingRight: "4rem" }}
               />
               <label htmlFor="floatingPassword">Password</label>
-              <div className="position-absolute top-0 end-0 h-100 d-flex align-items-center pe-2">
+              <div
+                className="position-absolute"
+                style={{
+                  top: "50%",
+                  right: "0.5rem",
+                  transform: "translateY(-50%)",
+                }}
+              >
                 <button
                   type="button"
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-outline-secondary btn-sm px-2 py-1 mt-5 shadow-sm"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label="Toggle password visibility"
                 >
@@ -354,7 +378,14 @@ function Signup() {
                     ? "Signin"
                     : "Signup"}
                 </button>
-                <p className="">
+                {login && (
+                  <div className="mt-2">
+                    <a href="/forgot-password" className="forgot-link">
+                      Forgot password
+                    </a>
+                  </div>
+                )}
+                <p className="mt-3">
                   By proceeding, you agree to the Finovate{" "}
                   <a
                     className=""
