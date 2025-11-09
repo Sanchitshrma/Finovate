@@ -5,9 +5,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 ## Project Overview
 
 Finovate is a full-stack stock trading simulation platform built with the MERN stack. It consists of three separate applications:
-- **Backend**: Express.js API server with MongoDB
-- **Frontend**: React-based landing/marketing website
-- **Dashboard**: React-based trading dashboard with real-time stock charts
+- Backend: Express.js API server with MongoDB
+- Frontend: React-based landing/marketing website
+- Dashboard: React-based trading dashboard with charts and authenticated API usage
 
 ## Development Commands
 
@@ -15,36 +15,34 @@ Finovate is a full-stack stock trading simulation platform built with the MERN s
 ```bash
 cd backend
 npm install
-npm start  # Runs with nodemon on port 8000
+npm start  # nodemon on port 8000
 ```
-
-**Environment Setup**: Create `backend/.env` with:
+Environment: create `backend/.env` with
 ```
 MONGODB_URL=your_mongo_connection_string
 JWT_SECRET=your_jwt_secret_key
 ```
-
-> Tests/Lint: No backend test or lint scripts are defined.
+> No backend test or lint scripts are defined.
 
 ### Frontend (Marketing Site)
 ```bash
 cd frontend
 npm install
-npm start  # Runs on port 3001
-npm run build  # Production build
-npm test  # Jest (via CRA) in watch mode
+npm start   # port 3001
+npm run build
+npm test    # CRA/Jest watch mode
 ```
 
 ### Dashboard (Trading Interface)
 ```bash
 cd dashboard
 npm install
-npm start  # Runs on port 3000
-npm run build  # Production build
-npm test  # Jest (via CRA) in watch mode
+npm start   # port 3000
+npm run build
+npm test    # CRA/Jest watch mode
 ```
 
-### Testing (Frontend + Dashboard)
+### Testing (CRA projects)
 - Run once (no watch):
 ```bash
 npm test -- --watchAll=false
@@ -53,135 +51,83 @@ npm test -- --watchAll=false
 ```bash
 npm test -- -- src/<file>.test.js
 ```
-- Run tests matching a name/pattern:
+- Run tests by name/pattern:
 ```bash
 npm test -- -t "pattern"
 ```
 
 ### Linting
-- No standalone lint scripts are configured. CRA enforces ESLint rules during `start`/`build`.
+- No standalone lint scripts; CRA enforces ESLint during `start`/`build`.
 
-**Port Configuration**:
-- Frontend runs on port 3001 (configured in `frontend/.env`)
-- Dashboard runs on port 3000 (configured in `dashboard/.env`)
-- After login/signup, users are redirected from frontend to dashboard
+### Ports and URLs
+- Frontend: port 3001 (via `frontend/.env`)
+- Dashboard: port 3000 (via `dashboard/.env`)
+- Backend: port 8000
+- Dashboard API base URL can be overridden via `REACT_APP_BACKEND_URL`. In production, it falls back to Render (`https://finovate-uh8i.onrender.com`) if not set; otherwise defaults to `http://localhost:8000` in development.
 
 ## Architecture
 
-### Backend Architecture
+### Backend
 
-**Entry Point**: `backend/index.js`
-- Express server on port 8000
-- CORS enabled for cross-origin requests
-- MongoDB connection on server startup
-- Uses bcrypt for password hashing (8 rounds)
+Entry: `backend/index.js`
+- Express server (port 8000), CORS, JSON body parsing
+- MongoDB connects at startup using `MONGODB_URL`
+- Bcrypt for password hashing (8 rounds), JWT for auth (24h expiry)
 
-**Data Layer Pattern**:
-- **Schemas** (`backend/schemas/`): Define Mongoose schemas (structure only)
-- **Models** (`backend/models/`): Export Mongoose models wrapping schemas
-- Models are imported and used directly in index.js
+Data layer pattern
+- Schemas (`backend/schemas/`): structure-only Mongoose schemas
+- Models (`backend/models/`): Mongoose models wrapping schemas, imported directly in `index.js`
 
-**API Endpoints**:
-- `GET /allHoldings` - Fetch all user holdings (scoped by JWT user)
-- `GET /allPositions` - Fetch current positions (scoped by JWT user)
-- `GET /holdings/:userId` - User-specific holdings
-- `GET /orders` - Fetch orders (sorted by date DESC)
-- `POST /newOrder` - Create buy/sell order (requires: name, qty, price, mode)
-- `POST /signup` - User registration (email + bcrypt hashed password)
-- `POST /login` - User authentication (bcrypt comparison)
-- `GET /watchlist` / `POST /watchlist` / `DELETE /watchlist/:symbol` - Manage per-user watchlist
-- `GET /verify` - Validate JWT and return user payload
-- `POST /addSamplePositions` - Seed sample positions (development only)
+Key endpoints
+- Auth: `POST /signup`, `POST /login`, `GET /verify`
+- Trading data: `GET /allHoldings`, `GET /allPositions`, `GET /holdings/:userId`, `GET /orders`
+- Orders: `POST /newOrder` (BUY/SELL; updates holdings accordingly)
+- Watchlist: `GET /watchlist`, `POST /watchlist`, `DELETE /watchlist/:symbol`
+- Dev seed: `POST /addSamplePositions` (authenticated)
 
-**Data Models**:
-- **HoldingsModel**: Long-term stock holdings (name, qty, avg, price, net, day)
-- **PositionsModel**: Current trading positions (includes product type, isLoss flag)
-- **OrdersModel**: Buy/sell order history (includes mode, date)
-- **WatchlistModel**: Per-user saved symbols
-- **UserModel**: User authentication (email, hashed password)
+Models
+- HoldingsModel, PositionsModel, OrdersModel, WatchlistModel, UserModel
 
-### Frontend Architecture
+### Frontend
 
-**Entry Point**: `frontend/src/index.js`
-- React Router for navigation
-- Persistent Navbar and Footer across all routes
+Entry: `frontend/src/index.js`
+- React Router for navigation with persistent `Navbar` and `Footer`
+- Routes: `/`, `/signup`, `/about`, `/product`, `/pricing`, `/support`
 
-**Page Structure** (`frontend/src/landing_page/`):
-- Each major page is a folder with subcomponents (Hero, sections, etc.)
-- Routes: `/` (home), `/signup`, `/about`, `/product`, `/pricing`, `/support`
-- Uses Bootstrap and Material UI for styling
+### Dashboard
 
-**Key Pattern**: Landing page is component-based with reusable sections
+Entry: `dashboard/src/index.js` → `components/Home.js`
+- All routes are wrapped in `ProtectedRoute` to require a valid JWT in localStorage
+- Layout: `TopBar` + main `Dashboard`
 
-### Dashboard Architecture
+API client
+- `dashboard/src/utils/axios.js`: axios instance
+  - `baseURL` resolves from `REACT_APP_BACKEND_URL`, else Render in production, else `http://localhost:8000`
+  - Request interceptor adds `Authorization: Bearer <token>`
+  - Response interceptor clears storage and redirects to `/signup` on 401
 
-**Entry Point**: `dashboard/src/index.js` → `components/Home.js`
-- TopBar + Dashboard layout
-
-**Core Pattern - GeneralContext**:
-- React Context API manages global buy/sell modal state
-- `GeneralContextProvider` wraps dashboard and injects BuyActionWindow/SellActionWindow modals
-- Context methods: `openBuyWindow(uid)`, `closeBuyWindow()`, `openSellWindow(uid)`, `closeSellWindow()`
-
-**Dashboard Component**:
-- Left sidebar: `WatchList` (persistent, wrapped in GeneralContextProvider)
-- Right content area: React Router with nested routes
-  - `/` → Summary
-  - `/orders` → Orders
-  - `/holdings` → Holdings
-  - `/positions` → Positions
-  - `/funds` → Funds
-  - `/apps` → Apps
-
-**WatchList Behavior**:
-- Displays stocks from `dashboard/src/data/data.js`
-- Hover actions on each stock: Buy, Sell, Analytics, More
-- Buy/Sell buttons trigger context methods to open modals
-
-**Modal Windows**:
-- `BuyActionWindow` and `SellActionWindow` float as overlays
-- POST to `http://localhost:8000/newOrder` with stock data
-- Hard-coded backend URL - change for production
-
-**API Client**:
-- Axios instance at `dashboard/src/utils/axios.js` sets `baseURL` to `http://localhost:8000` and injects `Authorization: Bearer <token>` via interceptors. 401 responses clear storage and redirect to `/signup`.
-
-**Charting**:
-- Uses Chart.js with react-chartjs-2
-- `DoughnutChart` visualizes watchlist distribution
-- `VerticalGraph` for other chart types
+Data/UI
+- Static seed data for lists/charts in `dashboard/src/data/data.js`
+- Charting via `chart.js` + `react-chartjs-2`
 
 ## Authentication & Authorization
 
-**Implementation**: JWT-based authentication with bcrypt password hashing
-
-**Backend**:
-- JWT tokens generated on login/signup (24h expiry)
-- Authentication middleware at `backend/middleware/auth.js`
-- Protected routes require `Authorization: Bearer <token>` header
-- All sensitive routes are protected (holdings, positions, orders, newOrder, watchlist)
-
-**Frontend/Dashboard**:
-- JWT tokens stored in localStorage after login/signup
-- Custom axios instance at `dashboard/src/utils/axios.js`
-- Automatic token injection via request interceptors
-- Automatic logout on token expiration (401 response)
-
-**See AUTHENTICATION.md for detailed documentation**
+- Middleware: `backend/middleware/auth.js` (`authenticateToken`) guards protected routes
+- Tokens stored in frontend/dashboard `localStorage`
+- Protected routes: holdings, positions, orders, newOrder, watchlist, addSamplePositions
+- Token expiry: 24h
+- See `AUTHENTICATION.md` for request/response examples and troubleshooting
 
 ## Key Technologies
 
-- **Backend**: Express 4.x, Mongoose 8.x, Bcrypt, JWT (jsonwebtoken), Passport (configured but unused)
-- **Frontend/Dashboard**: React 18, React Router v6/v7, Axios
-- **UI Libraries**: Material-UI (dashboard), Bootstrap (frontend)
-- **Dev Tools**: Nodemon for backend hot reload, Create React App for frontend builds
+- Backend: Express 4.x, Mongoose 8.x, Bcrypt, JWT (jsonwebtoken), Passport (installed but unused)
+- Frontend/Dashboard: React 18, React Router v6/v7, Axios, CRA
+- UI: Material-UI (dashboard), Bootstrap (frontend)
+- Dev: Nodemon, CRA
 
-## Important Notes
+## Notes
 
-- Backend must run before frontend/dashboard for API calls to work
-- MongoDB must be running and accessible via MONGODB_URL
-- **Authentication is now enforced**: All protected routes require valid JWT token
-- JWT_SECRET must be set in `backend/.env`
-- Passport.js is installed but not actively used (JWT handles authentication)
-- Stock data in dashboard is static (from `data/data.js`) - real-time integration pending
-- Tokens expire after 24 hours - users must re-login
+- Start backend before frontend/dashboard
+- Ensure MongoDB is reachable via `MONGODB_URL`
+- Tokens must be present for protected API calls
+- Stock data in dashboard is static (real-time integration pending)

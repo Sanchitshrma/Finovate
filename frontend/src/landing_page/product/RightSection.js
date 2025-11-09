@@ -7,29 +7,22 @@ function RightSection({
   tryDemoLink,
 }) {
   return (
-    <div className="container p-5 ">
-      <div className="row">
-        <div className="col-6 p-5 mt-5">
+    <div className="container py-5">
+      <div className="row align-items-center g-4">
+        <div className="col-12 col-lg-6 p-3 p-md-4 order-2 order-lg-1">
           <h1>{productName}</h1>
-          <p
-            style={{ lineHeight: "1.8", fontSize: "1.2em" }}
-            className="text-muted"
-          >
+          <p className="text-muted" style={{ lineHeight: 1.8 }}>
             {productDescription}
           </p>
           <div>
-            <a
-              href={tryDemoLink}
-              className="mx-1"
-              style={{ textDecoration: "none" }}
-            >
+            <a href={tryDemoLink} className="text-decoration-none">
               {tryDemo}
-              <i class="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
+              <i className="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
             </a>
           </div>
         </div>
-        <div className="col-6 ">
-          <img src={imageUrl} alt="leftimg" />
+        <div className="col-12 col-lg-6 order-1 order-lg-2">
+          <img src={imageUrl} alt="leftimg" className="img-fluid" />
         </div>
       </div>
     </div>

@@ -1,22 +1,24 @@
 import React from "react";
+import "../../components/Buttons.css";
+
 function Hero() {
   return (
-    <div className="conatiner p-5 mb-5">
-      <div className="row text-center">
-        <img src="media/images/homeHero.png" alt="HeroImage" className="mb-5" />
-        <h1 className="mt-5" style={{ fontSize: "3rem" }}>
-          Invest in everything
-        </h1>
-        <p className="fs-4 mb-5 text-muted ">
-          Online Platform to invest in stocks, derivaties, mutual funds, and
-          more
-        </p>
-        <button
-          className="p-2 btn btn-primary fs-5 mb-5"
-          style={{ width: "20%", margin: "0 auto" }}
-        >
-          Signup Now
-        </button>
+    <div className="container py-5 mb-5">
+      <div className="row text-center justify-content-center">
+        <div className="col-12">
+          <img src="media/images/homeHero.png" alt="HeroImage" className="img-fluid mb-5" />
+        </div>
+        <div className="col-12">
+          <h1 className="mt-4 display-5">Invest in everything</h1>
+          <p className="fs-5 mb-4 text-muted">
+            Online Platform to invest in stocks, derivaties, mutual funds, and more
+          </p>
+        </div>
+        <div className="col-12 d-flex justify-content-center">
+          <button className="btn btn-lg rounded-pill signup-cta mb-5">
+            Sign up for free
+          </button>
+        </div>
       </div>
     </div>
   );

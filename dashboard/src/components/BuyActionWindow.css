@@ -108,3 +108,12 @@
   backdrop-filter: blur(5px);
   z-index: 99;
 }
+
+/* Responsive: widen modal on small screens */
+@media (max-width: 768px) {
+  .container {
+    width: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

@@ -110,8 +110,8 @@ const Funds = () => {
         <Link className="btn btn-blue" onClick={handleWithdraw}>Withdraw</Link>
       </div>
 
-      <div className="row">
-        <div className="col">
+      <div className="row funds-row">
+        <div className="col funds-col">
           <span>
             <p>Equity {loading && <span style={{ fontSize: '12px', color: '#999' }}>Loading...</span>}</p>
           </span>
@@ -170,7 +170,7 @@ const Funds = () => {
           </div>
         </div>
 
-        <div className="col">
+        <div className="col funds-col">
           <div className="commodity">
             <p>You don't have a commodity account</p>
             <Link className="btn btn-blue" onClick={handleOpenCommodity}>Open Account</Link>

@@ -7,6 +7,7 @@ import { getStockPrice } from "../services/stockService";
 const TopBar = () => {
   const [nifty, setNifty] = useState({ price: 0, change: 0, changePercent: "0.00%" });
   const [sensex, setSensex] = useState({ price: 0, change: 0, changePercent: "0.00%" });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchIndicesData();
@@ -48,9 +49,27 @@ const TopBar = () => {
         </div>
       </div>
 
-      <Menu />
-      
+      {/* Desktop menu */}
+      <div className="menu-desktop">
+        <Menu />
+      </div>
+
+      {/* Hamburger for mobile/tablet */}
+      <button
+        className="topbar-hamburger"
+        aria-label="Toggle menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        <span className={menuOpen ? "hamburger open" : "hamburger"} />
+      </button>
+
       <UserMenu />
+
+      {/* Collapsible mobile menu */}
+      <div className={`menu-mobile ${menuOpen ? 'open' : ''}`}>
+        <Menu />
+      </div>
     </div>
   );
 };

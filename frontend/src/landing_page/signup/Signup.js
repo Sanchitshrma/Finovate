@@ -184,31 +184,31 @@ function Signup() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="container  mb-5">
-      <div className="row text-center p-5">
-        <h1 className=" mb-4 mt-5" style={{ fontSize: "3.5rem" }}>
+      <div className="row text-center py-4 py-md-5">
+        <h1 className="mb-3 display-5">
           Open a free demat and trading account online
         </h1>
-        <p className="fs-4 text-muted mb-5">
+        <p className="fs-5 text-muted mb-4">
           Start investing brokerage free and join a community of 1.5+ crore
           investors and traders
         </p>
       </div>
-      <div className="row p-5">
-        <div className="col-6">
+      <div className="row g-4 p-3 p-md-5">
+        <div className="col-12 col-lg-6">
           <img
             src="media/images/signup1.svg"
             alt="signupimage"
-            style={{ width: "100%" }}
+            className="img-fluid"
           />
         </div>
-        <div className="col-6">
+        <div className="col-12 col-lg-6">
           <h2 className="mb-2">{login ? "Login Now" : "Signup Now"}</h2>
           <span style={{ display: "flex", flexWrap: "wrap" }}>
             {!login ? (
               <>
                 <p className="mb-3">
                   For existing user{" "}
-                  <button onClick={loginHandler} class="btn btn-primary btn-md">
+                  <button onClick={loginHandler} className="btn btn-primary btn-md">
                     login
                   </button>
                 </p>
@@ -219,7 +219,7 @@ function Signup() {
                   For new user{" "}
                   <button
                     onClick={signupHandler}
-                    class="btn btn-primary btn-md"
+                    className="btn btn-primary btn-md"
                   >
                     Signup
                   </button>
@@ -228,28 +228,39 @@ function Signup() {
             )}
           </span>
 
-          <div class="form-floating mb-3">
+          <div className="form-floating mb-3">
             <input
               onChange={emailHanlder}
               value={email}
               type="email"
-              class="form-control"
+              className="form-control"
               id="floatingInput"
               placeholder="name@example.com"
             />
-            <label for="floatingInput">Email address</label>
+            <label htmlFor="floatingInput">Email address</label>
             {emailError && <div className="text-danger mt-1">{emailError}</div>}
           </div>
-          <div class="form-floating">
+          <div className="form-floating position-relative">
             <input
               onChange={passwordHanlder}
               value={password}
               type={showPassword ? "text" : "password"}
-              class="form-control"
+              className="form-control"
               id="floatingPassword"
               placeholder="Password"
+              style={{ paddingRight: '4rem' }}
             />
-            <label for="floatingPassword">Password</label>
+            <label htmlFor="floatingPassword">Password</label>
+            <div className="position-absolute top-0 end-0 h-100 d-flex align-items-center pe-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
             {passwordError && (
               <div className="text-danger mt-1">{passwordError}</div>
             )}
@@ -281,19 +292,6 @@ function Signup() {
                 Must contain uppercase, lowercase, and number
               </div>
             )}
-            <button
-              type="button"
-              className="btn btn-outline-secondary btn-sm mt-2"
-              style={{
-                position: "absolute",
-                right: 15,
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-              onClick={() => setShowPassword((prev) => !prev)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
             {!login && (
               <div className="form-floating mt-3">
                 <input
@@ -309,11 +307,11 @@ function Signup() {
                 )}
               </div>
             )}
-            <div class="col-auto">
+            <div className="col-auto">
               <button
                 onClick={signup}
                 type="submit"
-                class="btn btn-primary btn-lg mb-3 mt-4"
+                className="btn btn-primary btn-lg mb-3 mt-4"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Please wait..." : login ? "Signin" : "Signup"}
@@ -340,124 +338,127 @@ function Signup() {
           </div>
         </div>
       </div>
-      <div className="row text-center p-5">
-        <h1 className="mb-5">Investment options with Zerodha demat account</h1>
-        <div className="row p-5">
-          <div className="col-6">
+      <div className="row text-center p-3 p-md-5">
+        <h1 className="mb-4">Investment options with Zerodha demat account</h1>
+        <div className="row g-4 p-3 p-md-5">
+          <div className="col-12 col-md-6">
             <img
               src="media/images/stocks-acop.svg"
               alt="stocksimage"
-              style={{ width: "30%" }}
+              className="img-fluid"
+              style={{ maxWidth: "180px" }}
             />
-            <div>
+            <div className="mt-2">
               <h2>Stocks</h2>
-              <p className="fs-5 text-muted">
+              <p className="fs-6 text-muted">
                 Invest in all exchange-listed securities
               </p>
             </div>
           </div>
-          <div className="col-6">
+          <div className="col-12 col-md-6">
             <img
               src="media/images/mf-acop.svg"
               alt="mfimage"
-              style={{ width: "35%" }}
+              className="img-fluid"
+              style={{ maxWidth: "210px" }}
             />
-            <div>
+            <div className="mt-2">
               <h2>Mutual Funds</h2>
-              <p className="fs-5 text-muted mt-3">
+              <p className="fs-6 text-muted mt-1">
                 Invest in commission-free direct mutual funds
               </p>
             </div>
           </div>
-          <div className="row p-5">
-            <div className="col-6">
+          <div className="row g-4 p-3 p-md-5">
+            <div className="col-12 col-md-6">
               <img
                 src="media/images/ipo-acop.svg"
                 alt="stocksimage"
-                style={{ width: "30%" }}
+                className="img-fluid"
+                style={{ maxWidth: "180px" }}
               />
-              <div>
+              <div className="mt-2">
                 <h2>IPO</h2>
-                <p className="fs-5 text-muted">
+                <p className="fs-6 text-muted">
                   Apply to the latest IPOs instantly via UPI
                 </p>
               </div>
             </div>
-            <div className="col-6">
+            <div className="col-12 col-md-6">
               <img
                 src="media/images/fo-acop.svg"
                 alt="mfimage"
-                style={{ width: "30%" }}
+                className="img-fluid"
+                style={{ maxWidth: "180px" }}
               />
-              <div>
+              <div className="mt-2">
                 <h2>Futures & options</h2>
-                <p className="fs-5 text-muted">
+                <p className="fs-6 text-muted">
                   Hedge and mitigate market risk through simplified F&O trading
                 </p>
               </div>
             </div>
           </div>
         </div>
-        <button
-          className="p-2 btn btn-primary fs-5 btn-lg"
-          style={{ width: "40%", margin: "0 auto" }}
-        >
-          Explore Investments
-        </button>
+        <div className="d-flex justify-content-center">
+          <button className="btn btn-primary btn-lg">
+            Explore Investments
+          </button>
+        </div>
       </div>
-      <div className="row  mb-5 p-5 border-top border-bottom">
-        <h1 className=" mb-5 text-center">
+      <div className="row mb-5 p-3 p-md-5 border-top border-bottom">
+        <h1 className="mb-4 text-center">
           Steps to open a demat account with Finovate
         </h1>
-        <div className="col-6 mt-5">
+        <div className="col-12 col-lg-6 mt-4">
           <img
             src="media/images/steps-acop.svg"
             alt="mfimage"
-            style={{ width: "100%" }}
+            className="img-fluid"
           />
         </div>
-        <div className="col-6 mb-5">
-          <h2 className="mt-5 border-bottom p-3">
-            <i class="fa-regular fa-circle-dot"></i> Enter the requested details
+        <div className="col-12 col-lg-6 mb-4">
+          <h2 className="mt-4 border-bottom p-3">
+            <i className="fa-regular fa-circle-dot"></i> Enter the requested details
           </h2>
-          <h2 className="mt-5 border-bottom p-3">
-            <i class="fa-regular fa-circle-dot"></i> Complete e-sign &
+          <h2 className="mt-4 border-bottom p-3">
+            <i className="fa-regular fa-circle-dot"></i> Complete e-sign &
             verification
           </h2>
-          <h2 className="mt-5 border-bottom p-3">
-            <i class="fa-regular fa-circle-dot"></i> Start investing!
+          <h2 className="mt-4 border-bottom p-3">
+            <i className="fa-regular fa-circle-dot"></i> Start investing!
           </h2>
         </div>
       </div>
-      <div className="row p-5 mb-5">
-        <div className="col-6 mt-5 ">
+      <div className="row p-3 p-md-5 mb-5">
+        <div className="col-12 col-lg-6 mt-4">
           <img
             src="media/images/acop-benefits.svg"
             alt="stocksimage"
-            style={{ width: "90%" }}
+            className="img-fluid"
           />
-          <h1 className="mt-5 text-muted">
+          <h1 className="mt-4 text-muted">
             Benefits of opening a Finovate demat account
           </h1>
         </div>
-        <div className="col-6" style={{ lineHeight: "2.5rem" }}>
+        <div className="col-12 col-lg-6" style={{ lineHeight: "2rem" }}>
           <h2 className="mb-3">Unbeatable pricing</h2>
-          <p className="fs-5 text-muted mb-5">
+          <p className="text-muted mb-4">
             Zero charges for equity & mutual fund investments. Flat ₹20 fees for
             intraday and F&O trades.
           </p>
           <h2 className="mb-3">Best investing experience</h2>
-          <p className="fs-5 text-muted mb-5">
+          <p className="text-muted mb-4">
             Simple and intuitive trading platform with an easy-to-understand
             user interface.
           </p>
           <h2 className="mb-3">No spam or gimmicks</h2>
-          <p className="fs-5 text-muted mb-5">
+          <p className="text-muted mb-4">
             Committed to transparency — no gimmicks, spam, "gamification", or
             intrusive push notifications.
           </p>
           <h2 className="mb-3">The Finovate universe</h2>
-          <p className="fs-5 text-muted mb-5">
+          <p className="text-muted mb-4">
             More than just an app — gain free access to the entire ecosystem of
             our partner products.
           </p>

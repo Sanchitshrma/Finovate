@@ -302,6 +302,101 @@ hr {
   margin-left: 20px;
 }
 
+/* TopBar hamburger styles */
+.topbar-hamburger {
+  background: none;
+  border: none;
+  padding: 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.topbar-hamburger:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #333;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.hamburger::before {
+  transform: translateY(-6px);
+}
+.hamburger::after {
+  transform: translateY(4px);
+}
+.hamburger.open {
+  background: transparent;
+}
+.hamburger.open::before {
+  transform: rotate(45deg);
+}
+.hamburger.open::after {
+  transform: rotate(-45deg);
+}
+
+/* Responsive layout adjustments */
+
+/* Responsive tables for orders/holdings/positions */
+@media (max-width: 992px) {
+  .order-table table {
+    min-width: 820px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-table table {
+    min-width: 680px;
+  }
+  .order-table th, .order-table td {
+    font-size: 0.8rem;
+    padding: 10px 8px;
+  }
+}
+@media (max-width: 992px) {
+  .dashboard-container {
+    flex-direction: column;
+    height: auto;
+    align-items: stretch;
+  }
+  .content {
+    flex-basis: auto;
+    height: auto;
+    padding: 16px;
+  }
+  .menu-container {
+    flex-basis: 100%;
+    padding: 10px 12px;
+  }
+  .menus li {
+    margin-right: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menus {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .menus li {
+    margin-right: 12px;
+  }
+  .profile .username {
+    display: none;
+  }
+  .orders {
+    height: auto;
+  }
+  .no-orders .icon {
+    transform: scale(3);
+  }
+}
+
 .profile .avatar {
   width: 30px;
   height: 30px;
@@ -382,6 +477,12 @@ hr {
   font-weight: 300;
   color: rgb(71, 71, 71);
   margin-bottom: 2%;
+}
+
+.order-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .order-table table {
@@ -965,3 +1066,114 @@ hr {
 }
 
 /* watchlist */
+
+/* Responsive: WatchList & TopBar tweaks */
+@media (max-width: 992px) {
+  .topbar-container {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 12px;
+  }
+  .indices-container {
+    flex-basis: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgb(224, 224, 224);
+    padding: 8px 0;
+    justify-content: space-between;
+  }
+  .nifty, .sensex {
+    flex-basis: auto;
+    gap: 8px;
+  }
+  .index, .index-points, .percent {
+    font-size: 0.75rem;
+  }
+
+  /* hide desktop menu, show hamburger */
+  .menu-desktop {
+    display: none;
+  }
+  .topbar-hamburger {
+    display: inline-flex;
+  }
+
+  .menu-mobile {
+    display: none;
+    width: 100%;
+    border-top: 1px solid #eee;
+    background: #fff;
+    padding: 8px 0;
+  }
+  .menu-mobile.open {
+    display: block;
+  }
+  .menu-mobile .menu-container {
+    display: block;
+    padding: 8px 12px;
+  }
+  .menu-mobile .menus ul {
+    padding-left: 0;
+  }
+  .menu-mobile .menus li {
+    display: block;
+    margin: 8px 0;
+  }
+  .menu-mobile img {
+    display: none;
+  }
+
+  /* funds page */
+  .funds {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    text-align: center;
+  }
+  .funds-row {
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .funds-col {
+    flex-basis: 100%;
+  }
+  .table {
+    padding: 16px;
+  }
+  .data {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .watchlist-container {
+    flex-basis: 100%;
+    height: auto;
+    max-height: 50vh;
+  }
+  .watchlist-number {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .index, .index-points, .percent {
+    font-size: 0.7rem;
+  }
+  .indices-container {
+    justify-content: space-around;
+  }
+  .watchlist-container {
+    max-height: 45vh;
+  }
+}
+
+/* desktop defaults for menu visibility */
+@media (min-width: 992px) {
+  .menu-desktop {
+    display: block;
+  }
+  .topbar-hamburger,
+  .menu-mobile {
+    display: none;
+  }
+}
