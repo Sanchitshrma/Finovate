@@ -290,51 +290,45 @@ app.post('/ai/insights', authenticateToken, async (req, res) => {
 
     const prompt = `Create a professional research brief (~500–700 words) for the stock below with clear section headings in markdown. Sections to include:\n1) Overview (business, listing exchange)\n2) 5-year performance (CAGR, annualized volatility, max drawdown)\n3) Trend & key levels (recent momentum, support/resistance, notable inflection dates)\n4) Risks & what to watch\n5) Catalysts (near-term and medium-term)\n6) Outlook scenarios (bull / base / bear) with important levels\n7) Concise closing summary with actionable watchpoints.\n\nCRITICAL FORMAT & LOCALE RULES:\n- Assume Indian markets (NSE/BSE) and use Indian Rupee only.\n- Currency must be INR with the rupee symbol (₹) everywhere.\n- Do NOT use the $ symbol or USD unless explicitly stated; convert to ₹ if any figures are mentioned.\n- Indian numbering (lakh/crore) is acceptable when it improves readability.\n- If data is unknown, state it explicitly; do not fabricate.\n\nSymbol: ${symbol}\nCAGR: ${(cagr*100).toFixed(2)}%  MaxDD: ${(maxDrawdown*100).toFixed(2)}%\nHistory (date, close):\n${hist.slice(-750).map(p=>`${p.date.toISOString().slice(0,10)}, ${p.close}`).join('\n')}\n${extraContext ? `\nExtra context: ${extraContext}` : ''}`;
 
-    // Try @google/genai layout first
+    // Call Gemini via REST using a single fast model to keep latency low.
     try {
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-      const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt });
-      let markdownText = '';
-      try {
-        if (typeof response.text === 'function') {
-          markdownText = await response.text();
-        } else {
-          markdownText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        }
-      } catch {
-        markdownText = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      }
-      const html = await mdToHtml(markdownText || '');
-      return res.json({ text: markdownText, html });
-    } catch (sdkErr) {
-      // Fallback to REST with model fallbacks
-      const MODELS = Array.isArray(models) && models.length > 0 ? models : [
-        'gemini-1.5-flash-latest',
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-001',
-        'gemini-1.5-pro',
-        'gemini-pro',
-      ];
+      const MODEL = 'gemini-2.5-flash';
       const body = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
-      let lastErr = '';
-      for (const model of MODELS) {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`;
-        const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (r.ok) {
-          const data = await r.json();
-          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const html = await mdToHtml(text || '');
-          return res.json({ text, html });
-        }
-        lastErr = await r.text().catch(()=> '');
-        if (![400,404,501].includes(r.status)) {
-          const html = await mdToHtml(lastErr || 'Gemini error');
-          return res.status(r.status).json({ message: lastErr || 'Gemini error', html, text: lastErr || 'Gemini error' });
-        }
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(GEMINI_KEY)}`;
+      const r = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const raw = await r.text().catch(() => '');
+      if (!r.ok) {
+        const html = await mdToHtml(raw || 'Gemini error');
+        return res.status(r.status).json({
+          message: raw || 'Gemini error',
+          html,
+          text: raw || 'Gemini error',
+        });
       }
-      const html = await mdToHtml(`No supported Gemini model responded. Last: ${lastErr}`);
-      return res.status(502).json({ message: `No supported Gemini model responded. Last: ${lastErr}`, html, text: `No supported Gemini model responded. Last: ${lastErr}` });
+
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        // If parsing fails, just return the raw text as the response body.
+        const html = await mdToHtml(raw || 'Gemini response parse error');
+        return res.json({ text: raw || 'Gemini response parse error', html });
+      }
+
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const html = await mdToHtml(text || '');
+      return res.json({ text, html });
+    } catch (sdkErr) {
+      console.error('Gemini REST call failed:', sdkErr);
+      const html = await mdToHtml('Gemini API call failed.');
+      return res
+        .status(500)
+        .json({ message: 'Gemini API call failed.', html, text: 'Gemini API call failed.' });
     }
   } catch (e) {
     console.error('AI insights proxy failed:', e);

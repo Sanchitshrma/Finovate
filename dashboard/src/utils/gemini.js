@@ -11,12 +11,11 @@ export async function generateStockInsights({
     throw new Error("Missing REACT_APP_GEMINI_API_KEY");
   }
   const MODELS = [
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-001",
-    "gemini-1.5-pro",
-    "gemini-pro",
-    "@google/genai",
+    // Prefer current 2.x Gemini text models; backend will fall back through this list.
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-001",
   ];
 
   const summaryStats = (() => {
@@ -75,33 +74,24 @@ ${extraContext ? `\nExtra context: ${extraContext}` : ""}`;
   try {
     const payload = {
       symbol,
-      history: (history || []).map(p => ({ date: p.date.toISOString(), close: p.close })),
+      history: (history || []).map((p) => ({ date: p.date.toISOString(), close: p.close })),
       extraContext,
       models: MODELS,
       apiKey,
     };
-    const resp = await api.post('/ai/insights', payload);
-    return { text: resp.data?.text || resp.data?.message || 'No response.', html: resp.data?.html || '' };
+    const resp = await api.post("/ai/insights", payload);
+    return {
+      text: resp.data?.text || resp.data?.message || "No response.",
+      html: resp.data?.html || "",
+    };
   } catch (proxyErr) {
-    // Fallback to direct REST
-    let lastErr = "";
-    for (const model of MODELS) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const candidate = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
-        return { text: candidate, html: '' };
-      }
-      lastErr = await res.text().catch(() => "");
-      if (![400, 404, 501].includes(res.status)) {
-        throw new Error(`Gemini API error: ${res.status} ${lastErr}`);
-      }
-    }
-    throw new Error(`Gemini API error: No supported model responded. Last error: ${lastErr}`);
+    // Surface backend error directly in the UI instead of falling back to browser fetch,
+    // which often results in an unhelpful "Failed to fetch".
+    const backendMessage =
+      proxyErr?.response?.data?.message ||
+      proxyErr?.response?.data?.error ||
+      proxyErr?.message;
+
+    throw new Error(backendMessage || "AI insights backend error");
   }
 }
