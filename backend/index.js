@@ -7,6 +7,10 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// Lightweight fetch polyfill for environments where global fetch is unavailable (e.g., Node < 18)
+// This is used by the Gemini AI fallback path below.
+const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
 const { HoldingsModel } = require("./models/HoldingsModel");
 const { PositionsModel } = require("./models/PositionsModel");
 const { OrdersModel } = require("./models/OrdersModel");
