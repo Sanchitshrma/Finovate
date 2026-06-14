@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../utils/axios";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -11,30 +12,31 @@ const FRONTEND_URL =
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const verifyToken = async () => {
-      // Check for token in URL first (for redirects from login)
-      const params = new URLSearchParams(window.location.search);
-      const tokenFromUrl = params.get('token');
-      const userFromUrl = params.get('user');
-      
-      // If token is in URL, save it to localStorage first
+      const params = new URLSearchParams(location.search);
+      const tokenFromUrl = params.get("token");
+      const userFromUrl = params.get("user");
+
       if (tokenFromUrl) {
-        localStorage.setItem('token', tokenFromUrl);
+        localStorage.setItem("token", tokenFromUrl);
         if (userFromUrl) {
           try {
             const userData = JSON.parse(decodeURIComponent(userFromUrl));
-            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem("user", JSON.stringify(userData));
           } catch (error) {
-            console.error('Failed to parse user data:', error);
+            console.error("Failed to parse user data:", error);
           }
         }
-      }
-      
-      // Now check for token in localStorage
-      const token = localStorage.getItem("token");
 
+        // Remove token params from URL to avoid reusing stale value subscriptions
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+
+      const token = localStorage.getItem("token");
       if (!token) {
         setIsAuthenticated(false);
         setIsLoading(false);
@@ -42,11 +44,9 @@ const ProtectedRoute = ({ children }) => {
       }
 
       try {
-        // Verify token with backend
         await api.get("/verify");
         setIsAuthenticated(true);
       } catch (error) {
-        // Token is invalid or expired
         console.error("Authentication failed:", error);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -57,34 +57,33 @@ const ProtectedRoute = ({ children }) => {
     };
 
     verifyToken();
-  }, []);
+  }, [location.search]);
 
-  // Show loading state while verifying
   if (isLoading) {
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        flexDirection: 'column',
-        gap: '12px',
-        color: "#666"
-      }} aria-live="polite">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+          gap: "12px",
+          color: "#666",
+        }}
+        aria-live="polite"
+      >
         <CircularProgress color="primary" />
         <div>Loading your dashboard…</div>
       </div>
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    // Redirect to frontend login page
     window.location.href = `${FRONTEND_URL}/signup`;
     return null;
   }
 
-  // Render protected content if authenticated
   return children;
 };
 

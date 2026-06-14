@@ -163,47 +163,31 @@ const WatchList = () => {
     ],
   };
 
-  // export const data = {
-  //   labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-  //   datasets: [
-  //     {
-  //       label: "# of Votes",
-  //       data: [12, 19, 3, 5, 2, 3],
-  //       backgroundColor: [
-  //         "rgba(255, 99, 132, 0.2)",
-  //         "rgba(54, 162, 235, 0.2)",
-  //         "rgba(255, 206, 86, 0.2)",
-  //         "rgba(75, 192, 192, 0.2)",
-  //         "rgba(153, 102, 255, 0.2)",
-  //         "rgba(255, 159, 64, 0.2)",
-  //       ],
-  //       borderColor: [
-  //         "rgba(255, 99, 132, 1)",
-  //         "rgba(54, 162, 235, 1)",
-  //         "rgba(255, 206, 86, 1)",
-  //         "rgba(75, 192, 192, 1)",
-  //         "rgba(153, 102, 255, 1)",
-  //         "rgba(255, 159, 64, 1)",
-  //       ],
-  //       borderWidth: 1,
-  //     },
-  //   ],
-  // };
   return (
     <div className="watchlist-container">
       <div className="search-container">
-        <button 
-          className="add-stock-button"
-          onClick={() => setIsAddModalOpen(true)}
-          title="Add stock to watchlist"
-          aria-label="Add stock to watchlist"
-        >
-          + Add Stock
-        </button>
-        <span className="counts">
-          {watchlist.length} / 50
-          {loading && <span style={{ marginLeft: '10px', fontSize: '12px' }}>🔄</span>}
-        </span>
+        <div className="watchlist-header-copy">
+          <div className="watchlist-header-main">
+            <div className="watchlist-header-text">
+              <p className="watchlist-kicker">Market radar</p>
+              <h3>Watchlist</h3>
+            </div>
+          </div>
+          <div className="watchlist-header-meta">
+            <span className="counts">
+              {watchlist.length} / 50 tracked
+              {loading && <span style={{ marginLeft: "10px", fontSize: "12px" }}>Refreshing</span>}
+            </span>
+            <button 
+              className="add-stock-button"
+              onClick={() => setIsAddModalOpen(true)}
+              title="Add stock to watchlist"
+              aria-label="Add stock to watchlist"
+            >
+              + Add Stock
+            </button>
+          </div>
+        </div>
       </div>
 
       {watchlist.length === 0 ? (

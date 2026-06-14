@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import "./PanelModal.css";
 
 const MoreActionsModal = ({ isOpen, onClose, symbol, onRemove }) => {
@@ -14,7 +15,7 @@ const MoreActionsModal = ({ isOpen, onClose, symbol, onRemove }) => {
   const googleUrl = `https://www.google.com/finance/quote/${encodeURIComponent(symbol)}`;
   const yahooUrl = `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}`;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="panel-modal" onClick={(e) => e.stopPropagation()}>
         <div className="panel-header">
@@ -28,7 +29,8 @@ const MoreActionsModal = ({ isOpen, onClose, symbol, onRemove }) => {
           <button className="panel-action" onClick={() => openLink(yahooUrl)}>Open on Yahoo Finance ↗</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

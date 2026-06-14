@@ -17,8 +17,8 @@ const DASHBOARD_URL =
     : "http://localhost:3000");
 
 function Signup() {
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [login, setLogin] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -159,12 +159,25 @@ function Signup() {
         }, 800);
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response && error.response.status === 400) {
-          const errorMsg =
-            error.response.data.message ||
-            "Invalid credentials or user already exists";
-          showToast(errorMsg, "error");
+      // Reset request-level state and map server error to form feedback.
+      setEmailError("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+
+      if (axios.isAxiosError(error) && error.response) {
+        const msg = error.response.data?.message ?? "An unexpected error occurred.";
+
+        if (error.response.status === 400) {
+          // Map known error messages to specific fields for UX.
+          if (msg.toLowerCase().includes("user already") || msg.toLowerCase().includes("not found")) {
+            setEmailError(msg);
+          } else if (msg.toLowerCase().includes("password")) {
+            setPasswordError(msg);
+          } else {
+            showToast(msg, "error");
+          }
+        } else if (error.response.status === 401 || error.response.status === 403) {
+          setPasswordError("Invalid email or password. Please try again.");
         } else {
           showToast("An unexpected error occurred. Please try again.", "error");
         }
@@ -209,25 +222,30 @@ function Signup() {
           </p>
         </div>
       )}
-      <div className="container  mb-5">
-        <div className="row text-center py-4 py-md-5">
-          <h1 className="mb-3 display-5">
-            Open a free demat and trading account online
+      <div className="container mb-5">
+        <div
+          className="text-center py-5"
+          style={{ background: "linear-gradient(160deg, #f0f7ff 0%, #fafafe 60%, #fff 100%)", borderRadius: "0 0 24px 24px", marginBottom: "2rem" }}
+        >
+          <span className="section-tag">Free account</span>
+          <h1 className="fw-bold mt-3 mb-2" style={{ fontSize: "2.25rem", letterSpacing: "-0.5px" }}>
+            Open a free demat &amp; trading account
           </h1>
-          <p className="fs-5 text-muted mb-4">
-            Start investing brokerage free and join a community of 1.5+ crore
-            investors and traders
+          <p className="fs-5 text-muted" style={{ maxWidth: 540, margin: "0 auto" }}>
+            Start investing brokerage-free and join a community of 1.5+ crore
+            investors and traders.
           </p>
         </div>
-        <div className="row g-4 p-3 p-md-5">
-          <div className="col-12 col-lg-6">
+        <div className="row g-4 px-3 px-md-5">
+          <div className="col-12 col-lg-6 d-flex align-items-center">
             <img
               src="media/images/signup1.svg"
-              alt="signupimage"
+              alt="Open free account"
               className="img-fluid"
             />
           </div>
           <div className="col-12 col-lg-6">
+            <div className="signup-form-card">
             <h2 className="mb-2">{login ? "Login Now" : "Signup Now"}</h2>
             <span style={{ display: "flex", flexWrap: "wrap" }}>
               {!login ? (
@@ -368,7 +386,7 @@ function Signup() {
               <div className="col-auto">
                 <button
                   onClick={signup}
-                  type="submit"
+                  type="button"
                   className="btn btn-primary btn-lg mb-3 mt-4"
                   disabled={isSubmitting}
                 >
@@ -405,12 +423,14 @@ function Signup() {
                 </p>
               </div>
             </div>
+            </div>{/* /signup-form-card */}
           </div>
         </div>
         <div className="row text-center p-3 p-md-5">
-          <h1 className="mb-4">
+          <span className="section-tag">What you can invest in</span>
+          <h2 className="fw-bold mt-3 mb-4" style={{ fontSize: "1.75rem" }}>
             Investment options with Finovate demat account
-          </h1>
+          </h2>
           <div className="row g-4 p-3 p-md-5">
             <div className="col-12 col-md-6">
               <img
@@ -473,15 +493,16 @@ function Signup() {
             </div>
           </div>
           <div className="d-flex justify-content-center">
-            <button className="btn btn-primary btn-lg">
-              Explore Investments
-            </button>
+            <a href="/product" className="btn btn-lg rounded-pill signup-cta">Explore Investments</a>
           </div>
         </div>
         <div className="row mb-5 p-3 p-md-5 border-top border-bottom">
-          <h1 className="mb-4 text-center">
-            Steps to open a demat account with Finovate
-          </h1>
+          <div className="text-center">
+            <span className="section-tag">How it works</span>
+            <h2 className="fw-bold mt-3 mb-4" style={{ fontSize: "1.75rem" }}>
+              Steps to open a demat account with Finovate
+            </h2>
+          </div>
           <div className="col-12 col-lg-6 mt-4">
             <img
               src="media/images/steps-acop.svg"
@@ -489,18 +510,22 @@ function Signup() {
               className="img-fluid"
             />
           </div>
-          <div className="col-12 col-lg-6 mb-4">
-            <h2 className="mt-4 border-bottom p-3">
-              <i className="fa-regular fa-circle-dot"></i> Enter the requested
-              details
-            </h2>
-            <h2 className="mt-4 border-bottom p-3">
-              <i className="fa-regular fa-circle-dot"></i> Complete e-sign &
-              verification
-            </h2>
-            <h2 className="mt-4 border-bottom p-3">
-              <i className="fa-regular fa-circle-dot"></i> Start investing!
-            </h2>
+          <div className="col-12 col-lg-6 mb-4 d-flex flex-column gap-3 justify-content-center">
+            {[
+              { num: "01", text: "Enter your details" },
+              { num: "02", text: "Complete e-sign & verification" },
+              { num: "03", text: "Start investing!" },
+            ].map((step) => (
+              <div key={step.num} className="feature-card d-flex align-items-center gap-3">
+                <span
+                  className="fw-bold gradient-text"
+                  style={{ fontSize: "1.5rem", minWidth: 36 }}
+                >
+                  {step.num}
+                </span>
+                <span className="fw-medium" style={{ fontSize: "1.05rem" }}>{step.text}</span>
+              </div>
+            ))}
           </div>
         </div>
         <div className="row p-3 p-md-5 mb-5">

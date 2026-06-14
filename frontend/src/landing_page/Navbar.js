@@ -1,55 +1,60 @@
-import { Link } from "react-router-dom";
-import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const linkClass = ({ isActive }) =>
+    isActive ? "nav-link active" : "nav-link";
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <nav className="navbar navbar-expand-lg navbar-light finovate-navbar">
       <div className="container">
-        <Link className="navbar-brand d-flex align-items-center" to="/">
+        <NavLink className="navbar-brand d-flex align-items-center" to="/">
           <img
             src="media/images/coins-solid.svg"
-            alt="logo"
+            alt="Finovate logo"
             className="img-fluid"
-            style={{ height: 28, width: 28 }}
+            style={{ height: 26, width: 26 }}
           />
-          <span className="ms-2 fs-4 text-primary">𝙁𝙞𝙣𝙤𝙫𝙖𝙩𝙚</span>
-        </Link>
+          <span className="ms-2 fs-5">Finovate</span>
+        </NavLink>
+
         <button
-          className="navbar-toggler"
+          className="navbar-toggler border-0 finovate-navbar-toggle"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent"
-          aria-expanded="false"
+          aria-expanded={menuOpen}
           aria-label="Toggle navigation"
+          onClick={() => setMenuOpen((open) => !open)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+
+        <div
+          className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}
+          id="navbarSupportedContent"
+        >
+          <ul className="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
             <li className="nav-item">
-              <Link className="nav-link" aria-current="page" to="/signup">
-                Signup
-              </Link>
+              <NavLink className={linkClass} to="/about">About</NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/about">
-                About
-              </Link>
+              <NavLink className={linkClass} to="/product">Product</NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/product">
-                Product
-              </Link>
+              <NavLink className={linkClass} to="/pricing">Pricing</NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/pricing">
-                Pricing
-              </Link>
+              <NavLink className={linkClass} to="/support">Support</NavLink>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/support">
-                Support
-              </Link>
+            <li className="nav-item ms-lg-2">
+              <NavLink className="nav-link nav-cta" to="/signup">Sign up free</NavLink>
             </li>
           </ul>
         </div>

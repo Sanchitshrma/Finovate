@@ -1,15 +1,18 @@
-.modal-overlay {
+.add-stock-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.56), rgba(15, 23, 42, 0.68));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   animation: fadeIn 0.2s ease;
+  padding: 24px;
+  backdrop-filter: blur(12px);
 }
 
 @keyframes fadeIn {
@@ -22,14 +25,16 @@
 }
 
 .add-stock-modal {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  border-radius: 28px;
+  width: min(1080px, 100%);
+  max-height: min(86vh, 920px);
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 34px 80px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -46,123 +51,175 @@
 .modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 28px 32px 22px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.10), transparent 24%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.95));
+}
+
+.modal-kicker,
+.modal-subtitle,
+.modal-results-bar span,
+.stock-price,
+.no-results p {
+  margin: 0;
+}
+
+.modal-kicker {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2563eb;
 }
 
 .modal-header h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #111;
+  margin: 8px 0 10px;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-subtitle {
+  max-width: 620px;
+  font-size: 0.98rem;
+  color: #64748b;
+  line-height: 1.5;
 }
 
 .close-button {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   font-size: 28px;
-  color: #666;
+  color: #475569;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  border-radius: 14px;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .close-button:hover {
-  background-color: #f3f4f6;
+  background-color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .modal-body {
-  padding: 20px 24px;
+  padding: 24px 32px 32px;
   overflow-y: auto;
   flex: 1;
 }
 
 .search-box {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .search-box input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 18px;
+  font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  background: #ffffff;
 }
 
 .search-box input:focus {
-  border-color: #667eea;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.modal-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .error-message {
-  padding: 12px;
-  background-color: #fee2e2;
+  padding: 14px 16px;
+  background-color: #fff1f2;
   color: #dc2626;
-  border-radius: 6px;
+  border-radius: 14px;
   margin-bottom: 16px;
   font-size: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.14);
 }
 
 .stocks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .stock-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  gap: 14px;
+  padding: 18px 18px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 20px;
   transition: all 0.2s;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .stock-item:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background-color: #f8fbff;
+  border-color: rgba(59, 130, 246, 0.18);
+  transform: translateY(-2px);
 }
 
 .stock-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  min-width: 0;
 }
 
 .stock-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: #111;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0f172a;
 }
 
 .stock-price {
-  font-size: 13px;
-  color: #666;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .add-button {
-  padding: 8px 16px;
-  background-color: #667eea;
+  min-width: 108px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
 }
 
 .add-button:hover:not(:disabled) {
-  background-color: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
 }
 
 .add-button:disabled {
@@ -171,12 +228,53 @@
 }
 
 .no-results {
+  grid-column: 1 / -1;
   text-align: center;
-  padding: 40px 20px;
+  padding: 56px 20px;
   color: #9ca3af;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  border-radius: 20px;
+  background: rgba(248, 250, 252, 0.82);
 }
 
-.no-results p {
-  margin: 0;
-  font-size: 15px;
+@media (max-width: 900px) {
+  .add-stock-overlay {
+    padding: 14px;
+  }
+
+  .add-stock-modal {
+    width: 100%;
+    border-radius: 22px;
+  }
+
+  .modal-header,
+  .modal-body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .stocks-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-header {
+    padding-top: 22px;
+    padding-bottom: 18px;
+  }
+
+  .modal-results-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stock-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-button {
+    width: 100%;
+  }
 }

@@ -8,6 +8,13 @@ const TopBar = () => {
   const [nifty, setNifty] = useState({ price: 0, change: 0, changePercent: "0.00%" });
   const [sensex, setSensex] = useState({ price: 0, change: 0, changePercent: "0.00%" });
   const [menuOpen, setMenuOpen] = useState(false);
+  const currentTime = new Date().toLocaleString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
   useEffect(() => {
     fetchIndicesData();
@@ -32,42 +39,50 @@ const TopBar = () => {
 
   return (
     <div className="topbar-container">
-      <div className="indices-container">
-        <div className="nifty">
-          <p className="index">NIFTY 50</p>
-          <p className="index-points">{nifty.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
-          <p className={`percent ${nifty.change >= 0 ? 'profit' : 'loss'}`}>
-            {nifty.change >= 0 ? '+' : ''}{nifty.changePercent}
-          </p>
+      <div className="topbar-bar">
+        <div className="topbar-left">
+          <div className="topbar-meta">
+            <p className="topbar-label">Indian markets</p>
+            <p className="topbar-time">{currentTime}</p>
+          </div>
+
+          <div className="indices-container">
+            <div className="nifty">
+              <p className="index">NIFTY 50</p>
+              <p className="index-points">{nifty.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+              <p className={`percent ${nifty.change >= 0 ? 'profit' : 'loss'}`}>
+                {nifty.change >= 0 ? '+' : ''}{nifty.changePercent}
+              </p>
+            </div>
+            <div className="sensex">
+              <p className="index">SENSEX</p>
+              <p className="index-points">{sensex.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+              <p className={`percent ${sensex.change >= 0 ? 'profit' : 'loss'}`}>
+                {sensex.change >= 0 ? '+' : ''}{sensex.changePercent}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="sensex">
-          <p className="index">SENSEX</p>
-          <p className="index-points">{sensex.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
-          <p className={`percent ${sensex.change >= 0 ? 'profit' : 'loss'}`}>
-            {sensex.change >= 0 ? '+' : ''}{sensex.changePercent}
-          </p>
+
+        <div className="topbar-right">
+          <div className="menu-desktop">
+            <Menu />
+          </div>
+
+          <button
+            className="topbar-hamburger"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            aria-controls="mobileMenu"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className={menuOpen ? "hamburger open" : "hamburger"} />
+          </button>
+
+          <UserMenu />
         </div>
       </div>
 
-      {/* Desktop menu */}
-      <div className="menu-desktop">
-        <Menu />
-      </div>
-
-      {/* Hamburger for mobile/tablet */}
-      <button
-        className="topbar-hamburger"
-        aria-label="Toggle menu"
-        aria-expanded={menuOpen}
-        aria-controls="mobileMenu"
-        onClick={() => setMenuOpen((v) => !v)}
-      >
-        <span className={menuOpen ? "hamburger open" : "hamburger"} />
-      </button>
-
-      <UserMenu />
-
-      {/* Collapsible mobile menu */}
       <div id="mobileMenu" className={`menu-mobile ${menuOpen ? 'open' : ''}`} role="navigation">
         <Menu />
       </div>

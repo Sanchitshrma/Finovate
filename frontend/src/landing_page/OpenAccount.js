@@ -4,20 +4,30 @@ import "../components/Buttons.css";
 
 function OpenAccount() {
   return (
-    <div className="container py-5 mb-5">
-      <div className="row text-center">
-        <h1 className="mt-4">Open a Finovate account</h1>
-        <p className="mt-2 fs-5 text-muted">
-          Modern platforms and apps, ₹0 investments, and flat ₹20 intraday and
-          F&O trades.
-        </p>
-        <div className="d-flex justify-content-center mt-3">
-          <Link to="/signup" className="btn btn-lg rounded-pill signup-cta" aria-label="Sign up for free">
+    <section style={{ padding: "4rem 1rem" }}>
+      <div className="container">
+        <div className="cta-section">
+          <span className="section-tag" style={{ background: "rgba(255,255,255,0.15)", color: "#fff" }}>
+            Get started today
+          </span>
+          <h2 className="fw-bold mt-3 mb-2" style={{ fontSize: "2.25rem", color: "#fff" }}>
+            Open a Finovate account
+          </h2>
+          <p className="mb-4" style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.05rem", maxWidth: 480, margin: "0 auto 1.5rem" }}>
+            Modern platforms &amp; apps, ₹0 investments, and flat ₹20 intraday
+            and F&amp;O trades.
+          </p>
+          <Link
+            to="/signup"
+            className="btn btn-lg rounded-pill signup-cta"
+            aria-label="Sign up for free"
+            style={{ background: "#fff", color: "var(--color-primary)", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
+          >
             Sign up for free
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

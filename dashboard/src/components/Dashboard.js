@@ -16,22 +16,32 @@ import { GeneralContextProvider } from "./GeneralContext";
 
 const Dashboard = () => {
   return (
-    <div className="dashboard-container">
-      <GeneralContextProvider>
-        <WatchList />
-      </GeneralContextProvider>
-      <div className="content">
-        <Routes>
-          <Route exact path="/" element={<Summary />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/holdings" element={<Holdings />} />
-          <Route path="/positions" element={<Positions />} />
-          <Route path="/funds" element={<Funds />} />
-          <Route path="/apps" element={<Apps />} />
-          <Route path="/ai" element={<StockInsights />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+    <div className="dashboard-main">
+      <div className="dashboard-shell">
+        <div className="dashboard-heading">
+          <p className="dashboard-eyebrow">Portfolio command center</p>
+        </div>
+
+        <div className="dashboard-layout">
+          <aside className="dashboard-sidebar">
+            <GeneralContextProvider>
+              <WatchList />
+            </GeneralContextProvider>
+          </aside>
+          <main className="dashboard-content">
+            <Routes>
+              <Route exact path="/" element={<Summary />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/holdings" element={<Holdings />} />
+              <Route path="/positions" element={<Positions />} />
+              <Route path="/funds" element={<Funds />} />
+              <Route path="/apps" element={<Apps />} />
+              <Route path="/ai" element={<StockInsights />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </main>
+        </div>
       </div>
     </div>
   );

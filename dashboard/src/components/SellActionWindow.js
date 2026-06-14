@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
 import api from "../utils/axios";
 
 import GeneralContext from "./GeneralContext";
@@ -13,6 +13,7 @@ const SellActionWindow = ({ uid }) => {
   const [modal, setModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
   const [holdings, setHoldings] = useState([]);
+  const { closeSellWindow } = useContext(GeneralContext);
 
   useEffect(() => {
     const fetchHoldings = async () => {
@@ -34,10 +35,33 @@ const SellActionWindow = ({ uid }) => {
     }
   }, [uid]);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        closeSellWindow();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [closeSellWindow]);
+
   const stock = holdings.find(item => item.name === uid);
   const availableQty = stock ? stock.qty : 0;
 
-  const { closeSellWindow } = useContext(GeneralContext);
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2,
+    }).format(value || 0);
 
   const handleSellClick = async () => {
     if (stockQuantity <= 0 || stockPrice <= 0) {
@@ -100,7 +124,7 @@ const SellActionWindow = ({ uid }) => {
     closeSellWindow();
   };
 
-  return (
+  return createPortal(
     <>
       <Modal 
         isOpen={modal.isOpen}
@@ -109,50 +133,117 @@ const SellActionWindow = ({ uid }) => {
         title={modal.title}
         message={modal.message}
       />
-      <div className="container buy-sell-window" draggable="true">
-      <h2 className="window-title">Sell {uid}</h2>
-      <p className="available-info">Available Quantity: {availableQty}</p>
-      <div className="form-section">
-        <div className="form-group">
-          <label htmlFor="qty">Quantity</label>
-          <input
-            type="number"
-            id="qty"
-            min="1"
-            value={stockQuantity}
-            onChange={(e) => setStockQuantity(Number(e.target.value))}
-            className="input-field"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="price">Price (₹)</label>
-          <input
-            type="number"
-            id="price"
-            step="0.05"
-            min="0"
-            value={stockPrice}
-            onChange={(e) => setStockPrice(Number(e.target.value))}
-            className="input-field"
-          />
-        </div>
-      </div>
+      <div className="trade-window-overlay" onClick={handleCancelClick}>
+        <div
+          className="trade-window trade-window-sell"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="trade-window-header">
+            <div>
+              <p className="trade-window-kicker">Execution ticket</p>
+              <h2 className="trade-window-title">Sell {uid}</h2>
+              <p className="trade-window-subtitle">
+                Exit part or all of your holding with a larger trade workspace
+                on desktop.
+              </p>
+            </div>
+            <button
+              className="trade-window-close"
+              onClick={handleCancelClick}
+              aria-label="Close sell window"
+            >
+              ×
+            </button>
+          </div>
 
-      <div className="buttons">
-        <span className="margin-info">
-          Margin required ₹{(stockQuantity * stockPrice).toFixed(2)}
-        </span>
-        <div className="btn-group">
-          <Link className="btn btn-red" onClick={handleSellClick}>
-            Sell
-          </Link>
-          <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
-            Cancel
-          </Link>
+          <div className="trade-window-body">
+            <section className="trade-window-panel">
+              <div className="trade-stat-grid">
+                <article className="trade-stat-card">
+                  <p>Instrument</p>
+                  <h3>{uid}</h3>
+                </article>
+                <article className="trade-stat-card">
+                  <p>Available quantity</p>
+                  <h3>{availableQty}</h3>
+                </article>
+                <article className="trade-stat-card danger">
+                  <p>Estimated proceeds</p>
+                  <h3>{formatCurrency(stockQuantity * stockPrice)}</h3>
+                </article>
+              </div>
+
+              <div className="trade-form-grid">
+                <div className="form-group">
+                  <label htmlFor="sellQty">Quantity</label>
+                  <input
+                    type="number"
+                    id="sellQty"
+                    min="1"
+                    value={stockQuantity}
+                    onChange={(e) => setStockQuantity(Number(e.target.value))}
+                    className="input-field"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="sellPrice">Price (₹)</label>
+                  <input
+                    type="number"
+                    id="sellPrice"
+                    step="0.05"
+                    min="0"
+                    value={stockPrice}
+                    onChange={(e) => setStockPrice(Number(e.target.value))}
+                    className="input-field"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <aside className="trade-window-summary">
+              <p className="trade-window-kicker">Order summary</p>
+              <div className="trade-summary-list">
+                <div>
+                  <span>Order type</span>
+                  <strong>Market sell</strong>
+                </div>
+                <div>
+                  <span>Available qty</span>
+                  <strong>{availableQty}</strong>
+                </div>
+                <div>
+                  <span>Requested qty</span>
+                  <strong>{stockQuantity}</strong>
+                </div>
+                <div>
+                  <span>Estimated proceeds</span>
+                  <strong>{formatCurrency(stockQuantity * stockPrice)}</strong>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <div className="trade-window-footer">
+            <span className="margin-info">
+              Estimated proceeds {formatCurrency(stockQuantity * stockPrice)}
+            </span>
+            <div className="btn-group">
+              <button className="trade-btn trade-btn-secondary" onClick={handleCancelClick}>
+                Cancel
+              </button>
+              <button
+                className="trade-btn trade-btn-danger"
+                onClick={handleSellClick}
+                disabled={availableQty === 0}
+              >
+                Confirm Sell
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    </>
+    </>,
+    document.body
   );
 };
 

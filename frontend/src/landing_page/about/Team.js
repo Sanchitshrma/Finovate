@@ -1,36 +1,37 @@
 import React from "react";
 function Team() {
   return (
-    <div className="container py-5">
-      <div className="row mt-4 pt-4 border-top">
-        <h1 className="text-center">People</h1>
-      </div>
-      <div className="row text-muted align-items-center" style={{ lineHeight: 1.8 }}>
-        <div className="col-12 col-lg-6 p-4 text-center">
-          <img
-            src="media/images/SanchitSharma.jpeg"
-            className="img-fluid rounded-circle"
-            style={{ maxWidth: "300px" }}
-            alt="img"
-          />
-          <h4 className="mt-4">Sanchit Sharma</h4>
-          <h5>Founder, CEO</h5>
-        </div>
-        <div className="col-12 col-lg-6 p-4">
-          <p>Sanchit is a web developer.</p>
-          <p></p>
-          <p></p>
-          <p>
-            Connect on
-            <a href="/" style={{ textDecoration: "none" }} className="ms-1">Homepage</a>
-            /
-            <a href="/support" style={{ textDecoration: "none" }} className="mx-1">TradingQnA</a>
-            /
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }} className="ms-1">Twitter</a>
-          </p>
+    <section className="container py-5">
+      <div className="row mb-4" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "3rem" }}>
+        <div className="col-12 text-center">
+          <span className="section-tag">Our team</span>
+          <h2 className="fw-bold mt-3" style={{ fontSize: "2rem" }}>The people behind Finovate</h2>
         </div>
       </div>
-    </div>
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-8 col-lg-6">
+          <div className="feature-card text-center p-4">
+            <img
+              src="media/images/SanchitSharma.jpeg"
+              className="rounded-circle mb-3"
+              style={{ width: 120, height: 120, objectFit: "cover", border: "3px solid var(--color-border)" }}
+              alt="Sanchit Sharma"
+            />
+            <h5 className="fw-bold mb-0">Sanchit Sharma</h5>
+            <p className="text-muted mb-3" style={{ fontSize: "0.875rem" }}>Founder &amp; CEO</p>
+            <p className="text-muted mb-3" style={{ fontSize: "0.9rem", lineHeight: 1.8 }}>
+              Sanchit is a web developer and the founder of Finovate, building
+              modern investing infrastructure for India.
+            </p>
+            <div className="d-flex justify-content-center gap-3">
+              <a href="/" className="arrow-link" style={{ fontSize: "0.85rem" }}>Homepage</a>
+              <a href="/support" className="arrow-link" style={{ fontSize: "0.85rem" }}>TradingQnA</a>
+              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="arrow-link" style={{ fontSize: "0.85rem" }}>Twitter</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import "./PanelModal.css";
 
 const AnalyticsModal = ({ isOpen, onClose, symbol, data = {} }) => {
@@ -7,7 +8,7 @@ const AnalyticsModal = ({ isOpen, onClose, symbol, data = {} }) => {
   const googleUrl = `https://www.google.com/finance/quote/${encodeURIComponent(symbol)}`;
   const yahooUrl = `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}`;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="panel-modal" onClick={(e) => e.stopPropagation()}>
         <div className="panel-header">
@@ -36,7 +37,8 @@ const AnalyticsModal = ({ isOpen, onClose, symbol, data = {} }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

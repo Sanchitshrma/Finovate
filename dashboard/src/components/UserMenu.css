@@ -1,21 +1,28 @@
 .user-menu-container {
   position: relative;
-  display: inline-block;
-  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  margin-left: 0;
 }
 
 .user-menu-trigger {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 8px 16px;
+  min-height: 52px;
+  padding: 8px 14px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+  border-radius: 16px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.48);
 }
 
 .user-menu-trigger:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(59, 130, 246, 0.16);
 }
 
 .user-avatar {
@@ -187,5 +194,9 @@
   
   .user-menu-dropdown {
     min-width: 260px;
+  }
+
+  .user-menu-trigger {
+    padding: 8px 10px;
   }
 }

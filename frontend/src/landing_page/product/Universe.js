@@ -3,11 +3,14 @@ function Universe() {
   return (
     <div className="container py-5">
       <div className="row py-4 text-center g-4">
-        <h2 className="mb-2">The Finovate Universe</h2>
-        <p className="fs-6 mb-3">
-          Extend your trading and investment experience even further with our
-          partner platforms
-        </p>
+        <div className="col-12">
+          <span className="section-tag">Partner platforms</span>
+          <h2 className="fw-bold mt-3 mb-2" style={{ fontSize: "2rem" }}>The Finovate Universe</h2>
+          <p className="text-muted fs-6 mb-3" style={{ maxWidth: 500, margin: "0 auto 1.5rem" }}>
+            Extend your trading and investment experience even further with our
+            partner platforms
+          </p>
+        </div>
         <div className="col-6 col-lg-4 p-3 mt-3">
           <img
             src="media/images/goldenpiLogo.png"
@@ -76,7 +79,7 @@ function Universe() {
           </p>
         </div>
         <div className="col-12 d-flex justify-content-center mt-2">
-          <button className="btn btn-primary btn-lg">Signup Now</button>
+          <a href="/signup" className="btn btn-lg rounded-pill signup-cta">Open free account</a>
         </div>
       </div>
     </div>
